@@ -16,9 +16,9 @@ class Agent():
         eps_min: float = 0.15,
     ):
         self.model = model
-        self.eps = eps
-        self.eps_anneal = eps_anneal
-        self.eps_min = eps_min
+        self._eps = eps
+        self._eps_anneal = eps_anneal
+        self._eps_min = eps_min
 
     def get_action(self, tf_obs: tf.Tensor) -> Action:
         mcts = MCTS(self.model)
@@ -40,7 +40,7 @@ class Agent():
         return next_action
 
     def _update_eps(self) -> None:
-        self.eps = np.max([self.eps*self.eps_anneal, self.eps_min])
+        self._eps = np.max([self._eps*self._eps_anneal, self._eps_min])
 
     def save(self, path: str) -> None:
         self.model.save(path)
