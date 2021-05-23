@@ -14,10 +14,10 @@ class Env():
                                      Action.SOUTH, Action.WEST, Action.EAST],
         hunger_rate: int = 40
     ):
-        self.num_rows = num_rows
-        self.num_columns = num_colums
+        self._num_rows = num_rows
+        self._num_columns = num_colums
         self.action_list = action_list
-        self.hunger_rate = hunger_rate
+        self._hunger_rate = hunger_rate
 
     def get_action_size(self) -> int:
         return len(self.action_list)
@@ -40,7 +40,7 @@ class Env():
 
             # 今のpositionから、今回のActionをした時に移動するheadのpositionを計算
             head = translate(goose[0], direction_list[i],
-                             self.columns, self.rows)
+                             self._num_columns, self._num_rows)
 
             # 前回の行動の逆の行動をした場合、失格
             if last_obs is not None and head == last_obs.geese[i][0]:
@@ -57,7 +57,7 @@ class Env():
             goose.insert(0, head)
 
             # hunger_rateに一回、小さくなる
-            if next_obs.step % self.hunger_rate == 0:
+            if next_obs.step % self._hunger_rate == 0:
                 if len(goose) > 0:
                     goose.pop()
 
@@ -77,6 +77,25 @@ class Env():
                     geese[i] = []
 
         return next_obs
+
+    def get_valid_moves(
+            self,
+            obs: Observation,
+            last_obs: Observation,
+            index: int) -> List[bool]:
+        geese = obs.geese
+        pos = geese[index][0]
+        obstacles = {position for goose in geese for position in goose[:-1]}
+        if last_obs is not None:
+            obstacles.add(last_obs.geese[index][0])
+
+        valid_moves = [
+            translate(pos, action, self._num_columns,
+                      self._num_rows) not in obstacles
+            for action in self.action_list
+        ]
+
+        return valid_moves
 
     def get_representation(self, obs: Observation) -> str:
         return str(obs.geese + obs.food)
