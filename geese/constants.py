@@ -1,0 +1,5 @@
+# Field Size
+FIELD_HEIGHT = 7
+FIELD_WIDTH = 11
+
+NUM_CHANNELS = 17
