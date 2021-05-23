@@ -19,11 +19,11 @@ class Agent():
         self._eps = eps
         self._eps_anneal = eps_anneal
         self._eps_min = eps_min
+        self._mcts = MCTS(self.model)
 
     def get_action(self, tf_obs: tf.Tensor) -> Action:
-        mcts = MCTS(self.model)
 
-        prob = mcts.get_prob()
+        prob = self._mcts.get_prob()
 
         # ε-greedyで次アクションをチョイス
         prob = prob.numpy()
