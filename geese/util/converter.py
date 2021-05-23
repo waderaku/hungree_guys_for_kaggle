@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-from geese.structure import Observation
+from kaggle_environments.envs.hungry_geese.hungry_geese import Observation
 from geese.constants import FIELD_HEIGHT, FIELD_WIDTH, NUM_CHANNELS
 
 
