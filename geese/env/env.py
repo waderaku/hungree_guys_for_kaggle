@@ -1,5 +1,4 @@
-from geese.structure import Observation
-from kaggle_environments.envs.hungry_geese.hungry_geese import Action, translate
+from kaggle_environments.envs.hungry_geese.hungry_geese import Action, translate, Observation
 from kaggle_environments.helpers import histogram
 
 from typing import List

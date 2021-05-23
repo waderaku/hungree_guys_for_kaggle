@@ -1,4 +1,3 @@
-from geese.structure import Observation
 import tensorflow as tf
 
 
