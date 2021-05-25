@@ -15,11 +15,12 @@ class PPOAgent(Agent):
     ):
         self._model = model
 
-    def step(self, obs: Observation) -> Tuple[Action, np.ndarray, np.ndarray]:
+    def step(self, obs: Observation) -> Tuple[Action, float, np.ndarray]:
         prob, value = self._model(obs)
-        prob = prob.numpy()
+        prob = prob.numpy()[0]
+        value = value.numpy()[0]
         next_action = np.random.choice(ACTIONLIST, p=prob)
-        return next_action, value.numpy(), prob
+        return next_action, value, prob
 
     def get_action(self, obs: Observation) -> Action:
         next_action, _, _ = self.step(obs)

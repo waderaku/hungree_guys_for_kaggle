@@ -68,8 +68,8 @@ class MCTS:
                     obs, i))
 
                 self._policy_state[(state, i)] = self._policy_state[(
-                    state, i)].numpy()
-                value_list[i] = value_list[i].numpy()
+                    state, i)].numpy()[0]
+                value_list[i] = value_list[i].numpy()[0]
 
                 # 行動可能エリアでフィルターをかける
                 valid_list = self._env.get_valid_moves(obs,  i)
