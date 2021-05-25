@@ -31,7 +31,7 @@ class MCTS:
         self._valid_state = {}
         self._Q_state_action = {}
 
-    def get_prob(self, obs: Observation) -> List[float]:
+    def get_prob(self, obs: Observation) -> np.ndarray:
         start_time = time.time()
         obs.last_obs = self._last_obs
 
@@ -48,7 +48,7 @@ class MCTS:
         ]
         prob = counts / np.sum(counts)
         self._last_obs = obs
-        return prob
+        return np.array(prob)
 
     def search(self, obs: Observation) -> List[float]:
         state = self._env.get_representation(obs)
