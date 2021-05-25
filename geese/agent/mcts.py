@@ -1,6 +1,5 @@
 
 from geese.env.env import Env
-from kaggle_environments.envs.hungry_geese.hungry_geese import Observation
 from geese.constants import NUM_GEESE, TIME_LIMIT
 
 import tensorflow as tf
@@ -11,6 +10,7 @@ from typing import List
 
 from geese.env import Env
 from geese.util.converter import to_tf_tensor
+from geese.structure import Observation
 
 
 class MCTS:
@@ -33,10 +33,11 @@ class MCTS:
 
     def get_prob(self, obs: Observation) -> List[float]:
         start_time = time.time()
+        obs.last_obs = self._last_obs
 
         # 一定時間treeを展開する
         while time.time() - start_time < TIME_LIMIT:
-            self.search(obs, self._last_obs)
+            self.search(obs)
 
         s = self._env.get_representation(obs)
         i = obs.index
@@ -49,28 +50,29 @@ class MCTS:
         self._last_obs = obs
         return prob
 
-    def search(self, obs: Observation, last_obs: Observation) -> List[float]:
-        state = self._env.stringRepresentation(obs)
+    def search(self, obs: Observation) -> List[float]:
+        state = self._env.get_representation(obs)
 
         # 初めて来た場所なら、そこで展開
         if state not in self._num_state:
+
             # 価値の初期化
             value_list = [-10] * NUM_GEESE
             for i in range(NUM_GEESE):
-                if len(obs.geese[i]) == 0:
+                if len(obs.now_obs.geese[i]) == 0:
                     continue
 
                 # 葉ノード
                 # model.predictこれで問題ないのか？
                 self._policy_state[(state, i)], value_list[i] = self.model.predict(to_tf_tensor(
-                    obs, last_obs, i))
+                    obs, i))
 
                 self._policy_state[(state, i)] = self._policy_state[(
                     state, i)].numpy()
                 value_list[i] = value_list[i].numpy()
 
                 # 行動可能エリアでフィルターをかける
-                valid_list = self._env.getValidMoves(obs, last_obs, i)
+                valid_list = self._env.get_valid_moves(obs,  i)
                 self._policy_state[(state, i)] = self._policy_state[(state, i)] * \
                     valid_list
 
@@ -86,7 +88,7 @@ class MCTS:
 
         best_acts = [None] * 4
         for i in range(4):
-            if len(obs.geese[i]) == 0:
+            if len(obs.now_obs.geese[i]) == 0:
                 continue
 
             valid_list = self._valid_state[(state, i)]
@@ -110,11 +112,11 @@ class MCTS:
 
             best_acts[i] = best_act
 
-        next_obs = self._env.step(obs, last_obs, best_acts)
-        value_list = self.search(next_obs, obs)
+        next_obs = self._env.step(obs, best_acts)
+        value_list = self.search(next_obs)
 
         for i in range(4):
-            if len(obs.geese[i]) == 0:
+            if len(obs.now_obs.geese[i]) == 0:
                 continue
 
             a = self._env.action_list.index(best_acts[i])
