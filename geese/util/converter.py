@@ -1,11 +1,14 @@
 import tensorflow as tf
 import numpy as np
 
-from kaggle_environments.envs.hungry_geese.hungry_geese import Observation
+from geese.structure import Observation
 from geese.constants import FIELD_HEIGHT, FIELD_WIDTH, NUM_CHANNELS
 
 
-def to_tf_tensor(obs: Observation, last_obs: Observation, index: int) -> tf.Tensor:
+def to_tf_tensor(obs: Observation) -> tf.Tensor:
+    last_obs = obs.last_obs
+    index = obs.index
+    obs = obs.now_obs
     b = np.zeros((NUM_CHANNELS, FIELD_HEIGHT * FIELD_WIDTH), dtype=np.float32)
 
     for p, pos_list in enumerate(obs.geese):

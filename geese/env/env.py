@@ -1,8 +1,10 @@
-from kaggle_environments.envs.hungry_geese.hungry_geese import Action, translate, Observation
-from kaggle_environments.helpers import histogram
-
-from typing import List
 from copy import deepcopy
+from typing import List
+
+from geese.structure import Observation
+from kaggle_environments.envs.hungry_geese.hungry_geese import (Action,
+                                                                translate)
+from kaggle_environments.helpers import histogram
 
 
 class Env():
@@ -24,9 +26,10 @@ class Env():
 
     def step(self,
              obs: Observation,
-             last_obs: Observation,
              direction_list: List[int]
              ) -> Observation:
+        last_obs = obs.last_obs
+        obs = obs.now_obs
         next_obs = deepcopy(obs)
         next_obs.step += 1
         geese = next_obs.geese
