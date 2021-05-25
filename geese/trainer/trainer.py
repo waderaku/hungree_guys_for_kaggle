@@ -2,9 +2,7 @@ from abc import ABC, abstractmethod
 
 import tensorflow as tf
 
-
-class MiniBatch(ABC):
-    pass
+from geese.trainer.minibatch.minibatch import MiniBatch
 
 
 class Trainer(ABC):
