@@ -84,8 +84,9 @@ class Env():
     def get_valid_moves(
             self,
             obs: Observation,
-            last_obs: Observation,
             index: int) -> List[bool]:
+        last_obs = obs.last_obs
+        obs = obs.now_obs
         geese = obs.geese
         pos = geese[index][0]
         obstacles = {position for goose in geese for position in goose[:-1]}
@@ -101,4 +102,5 @@ class Env():
         return valid_moves
 
     def get_representation(self, obs: Observation) -> str:
+        obs = obs.now_obs
         return str(obs.geese + obs.food)

@@ -8,3 +8,7 @@ NUM_CHANNELS = 17
 # ActionList
 ACTIONLIST = [Action.NORTH,
               Action.SOUTH, Action.WEST, Action.EAST]
+
+NUM_GEESE = 4
+
+TIME_LIMIT = 1.0
