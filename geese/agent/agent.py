@@ -1,13 +1,33 @@
-from kaggle_environments.envs.hungry_geese.hungry_geese import Action
-from geese.agent.mcts import MCTS
+from abc import ABC, abstractmethod
 
-import tensorflow as tf
 import numpy as np
-
+import tensorflow as tf
+from geese.agent.mcts import MCTS
 from geese.constants import ACTIONLIST
+from geese.structure import Observation
+from kaggle_environments.envs.hungry_geese.hungry_geese import Action
 
 
-class Agent():
+class Agent(ABC):
+    @abstractmethod
+    def get_action(self, obs: Observation):
+        raise NotImplementedError
+
+    @abstractmethod
+    def save(self, path: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def load(self, path: str):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def model(self):
+        raise NotImplementedError
+
+
+class MCTSAgent(Agent):
     def __init__(
         self,
         model: tf.keras.models.Model,
@@ -20,7 +40,7 @@ class Agent():
         self._eps_anneal = eps_anneal
         self._eps_min = eps_min
 
-    def get_action(self, tf_obs: tf.Tensor) -> Action:
+    def get_action(self, obs: Observation) -> Action:
         mcts = MCTS(self.model)
 
         prob = mcts.get_prob()
@@ -32,7 +52,7 @@ class Agent():
     def _eps_greedy(self, prob: np.array) -> Action:
         rand = np.random.rand()
         self._update_eps()
-        if self.eps > rand:
+        if self._eps > rand:
             next_action = np.random.choice(ACTIONLIST)
         else:
             next_action = np.random.choice(ACTIONLIST, p=prob)
