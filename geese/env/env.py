@@ -23,5 +23,5 @@ class Env:
                 else False for p in range(Env.N_ACTION)]
         return [self._env.observation(p) for p in range(Env.N_ACTION)], reward, done
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._env)
