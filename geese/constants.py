@@ -1,4 +1,5 @@
 from kaggle_environments.envs.hungry_geese.hungry_geese import Action
+
 # Field Size
 FIELD_HEIGHT = 7
 FIELD_WIDTH = 11
