@@ -21,6 +21,10 @@ class Env():
         self.action_list = action_list
         self._hunger_rate = hunger_rate
 
+    def reset(self):
+
+        return
+
     def get_action_size(self) -> int:
         return len(self.action_list)
 
