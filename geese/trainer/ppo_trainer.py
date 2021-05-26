@@ -8,6 +8,8 @@ from geese.trainer.parameter import PPOTrainerParameter
 class PPOTrainer(Trainer):
     def __init__(self, parameter: PPOTrainerParameter):
         self._clip_eps = parameter.clip_eps
+        self._optimizer = tf.keras.optimizers.Adam(
+            learning_rate=parameter.learning_rate)
 
     def train(self, model: tf.keras.models.Model, minibatch: PPOMiniBatch) -> None:
         pass
@@ -22,11 +24,11 @@ class PPOTrainer(Trainer):
         v_old: tf.Tensor,
         v_old_n: tf.Tensor,
         pi_old: tf.Tensor
-    ) -> None:
+    ) -> tf.Tensor:
         with tf.GradientTape() as tape:
             # B, A and B
             pi_new, v_new = model(observation)
-            # Policy
+            # Compute Policy Loss
             # B, A
             advantage = n_step_return + v_old_n - v_old
             # B
@@ -46,5 +48,17 @@ class PPOTrainer(Trainer):
 
             # TFは勾配降下しかできないので、最大化したい目的関数の逆符号の最小化を行う
             loss_policy = -clipped_advantage * logit
-            # Update Value Function
-            pass
+
+            # Compute Value Loss
+            loss_value = tf.reduce_mean(
+                tf.keras.losses.MSE(advantage + v_old_n, v_new))
+
+            # Compute Entropy Loss
+            loss_entropy = tf.reduce_mean(tf.reduce_sum(
+                pi_new * tf.math.log(pi_new), axis=-1))
+
+            loss_total = loss_policy + loss_value + loss_entropy
+            gradient = tape.gradient(loss_total, model.trainable_variables)
+            self._optimizer.apply_gradients(
+                zip(gradient, model.trainable_variables))
+        return loss_total
