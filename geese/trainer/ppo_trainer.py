@@ -1,3 +1,4 @@
+from typing import Tuple
 import tensorflow as tf
 
 from geese.trainer.trainer import Trainer
@@ -12,7 +13,16 @@ class PPOTrainer(Trainer):
             learning_rate=parameter.learning_rate)
 
     def train(self, model: tf.keras.models.Model, minibatch: PPOMiniBatch) -> None:
-        pass
+        tmp_args = [
+            minibatch.observation,
+            minibatch.action,
+            minibatch.n_step_return,
+            minibatch.v,
+            minibatch.v_n,
+            minibatch.pi
+        ]
+        args = [model] + list(map(tf.convert_to_tensor, tmp_args))
+        self._train(*args)
 
     @tf.function
     def _train(
@@ -24,11 +34,11 @@ class PPOTrainer(Trainer):
         v_old: tf.Tensor,
         v_old_n: tf.Tensor,
         pi_old: tf.Tensor
-    ) -> tf.Tensor:
+    ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
         with tf.GradientTape() as tape:
             # B, A and B
             pi_new, v_new = model(observation)
-            # Compute Policy Loss
+            # Policy Lossの計算
             # B, A
             advantage = n_step_return + v_old_n - v_old
             # B
@@ -49,16 +59,18 @@ class PPOTrainer(Trainer):
             # TFは勾配降下しかできないので、最大化したい目的関数の逆符号の最小化を行う
             loss_policy = -clipped_advantage * logit
 
-            # Compute Value Loss
+            # Value Lossの計算
             loss_value = tf.reduce_mean(
                 tf.keras.losses.MSE(advantage + v_old_n, v_new))
 
-            # Compute Entropy Loss
+            # Entropy Lossの計算
             loss_entropy = tf.reduce_mean(tf.reduce_sum(
                 pi_new * tf.math.log(pi_new), axis=-1))
 
             loss_total = loss_policy + loss_value + loss_entropy
+
+            # Apply Gradients
             gradient = tape.gradient(loss_total, model.trainable_variables)
             self._optimizer.apply_gradients(
                 zip(gradient, model.trainable_variables))
-        return loss_total
+        return loss_policy, loss_value, loss_entropy

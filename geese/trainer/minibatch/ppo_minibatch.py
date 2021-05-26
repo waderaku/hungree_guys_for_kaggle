@@ -9,14 +9,14 @@ class PPOMiniBatch(MiniBatch):
         observation: np.ndarray,
         action: np.ndarray,
         n_step_return: np.ndarray,
-        v_0: np.ndarray,
+        v: np.ndarray,
         v_n: np.ndarray,
         pi: np.ndarray
     ):
         self._observation = observation
         self._action = action
         self._n_step_return = n_step_return
-        self._v_0 = v_0
+        self._v = v
         self._v_n = v_n
         self._pi = pi
 
@@ -33,7 +33,7 @@ class PPOMiniBatch(MiniBatch):
         return self._n_step_return
 
     @property
-    def v_0(self) -> np.ndarray:
+    def v(self) -> np.ndarray:
         return self._v_0
 
     @property
