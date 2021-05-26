@@ -2,6 +2,8 @@ import tensorflow as tf
 from geese.agent.model.parameter import BaseModelParameter, TorusConv2dParameter
 from geese.constants import ACTIONLIST
 
+from typing import Tuple
+
 
 class BaseModel(tf.keras.models.Model):
     def __init__(self, parameter: BaseModelParameter):
@@ -14,7 +16,7 @@ class BaseModel(tf.keras.models.Model):
         self._head_v = tf.keras.layers.Dense(units=1, use_bias=False)
         self._flatten = tf.keras.layers.Flatten()
 
-    def call(self, x: tf.Tensor) -> tf.Tensor:
+    def call(self, x: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
         out = self._init_block(x)
         for block in self._blocks:
             out = tf.keras.activations.relu(block(out) + out)
@@ -23,6 +25,7 @@ class BaseModel(tf.keras.models.Model):
         v = self._head_v(flatten)
         p = tf.keras.activations.softmax(p)
         v = tf.keras.activations.tanh(v)
+        v = tf.reshape(v, (-1))
         return p, v
 
 
