@@ -11,7 +11,7 @@ class PPOTrainerParameter(TrainerParameter):
         self._clip_eps = clip_eps
 
     @property
-    def learning_rate(self):
+    def learning_rate(self) -> float:
         return self._learning_rate
 
     @property
