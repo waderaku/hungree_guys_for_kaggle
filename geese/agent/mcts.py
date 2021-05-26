@@ -1,5 +1,4 @@
 
-from geese.env.env import Env
 from geese.constants import NUM_GEESE, TIME_LIMIT
 
 import tensorflow as tf

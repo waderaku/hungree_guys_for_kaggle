@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import tensorflow as tf
 
-from geese.trainer.minibatch.minibatch import MiniBatch
+from geese.structure.minibatch import MiniBatch
 
 
 class Trainer(ABC):

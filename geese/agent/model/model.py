@@ -1,5 +1,5 @@
 import tensorflow as tf
-from geese.agent.model.parameter import BaseModelParameter, TorusConv2dParameter
+from geese.structure.parameter import BaseModelParameter, TorusConv2dParameter
 from geese.constants import ACTIONLIST
 
 from typing import Tuple

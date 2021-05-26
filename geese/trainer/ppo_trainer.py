@@ -2,8 +2,8 @@ from typing import Tuple
 import tensorflow as tf
 
 from geese.trainer.trainer import Trainer
-from geese.trainer.minibatch.ppo_minibatch import PPOMiniBatch
-from geese.trainer.parameter import PPOTrainerParameter
+from geese.structure.minibatch import PPOMiniBatch
+from geese.structure.parameter import PPOTrainerParameter
 
 
 class PPOTrainer(Trainer):

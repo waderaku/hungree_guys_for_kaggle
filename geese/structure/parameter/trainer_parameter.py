@@ -1,7 +1,7 @@
-from abc import ABC
+from geese.structure.parameter.parameter import Parameter
 
 
-class TrainerParameter(ABC):
+class TrainerParameter(Parameter):
     pass
 
 

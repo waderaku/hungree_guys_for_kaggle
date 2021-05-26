@@ -1,6 +1,6 @@
 import numpy as np
 
-from geese.trainer.minibatch.minibatch import MiniBatch
+from geese.structure.minibatch.minibatch import MiniBatch
 
 
 class PPOMiniBatch(MiniBatch):
