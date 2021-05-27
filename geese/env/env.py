@@ -38,7 +38,7 @@ class Env:
         # 順位に基づくRewardの計算
         rank = rankdata([self._env.env.state[p]["reward"]
                          for p in range(len(actions))])
-        reward = list(map(self._rank2int, rank))
+        reward = list(map(self._rank2reward, rank))
 
         # Gooseごとの終了判定
         done = [self._env.env.state[p]["status"]
