@@ -7,5 +7,5 @@ class EnvParameter(Parameter):
         self._reward_list = reward_list
 
     @property
-    def reward_list(self):
+    def reward_list(self) -> float:
         return self._reward_list
