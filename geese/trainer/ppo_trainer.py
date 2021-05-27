@@ -1,28 +1,42 @@
 from typing import Tuple
+import numpy as np
 import tensorflow as tf
 
 from geese.trainer.trainer import Trainer
-from geese.trainer.minibatch.ppo_minibatch import PPOMiniBatch
-from geese.trainer.parameter import PPOTrainerParameter
+from geese.structure.sample import PPOSample
+from geese.structure.parameter import PPOTrainerParameter
 
 
 class PPOTrainer(Trainer):
     def __init__(self, parameter: PPOTrainerParameter):
-        self._clip_eps = parameter.clip_eps
         self._optimizer = tf.keras.optimizers.Adam(
             learning_rate=parameter.learning_rate)
+        self._batch_size = parameter.batch_size
+        self._num_epoch = parameter.num_epoch
+        self._clip_eps = parameter.clip_eps
 
-    def train(self, model: tf.keras.models.Model, minibatch: PPOMiniBatch) -> None:
-        tmp_args = [
-            minibatch.observation,
-            minibatch.action,
-            minibatch.n_step_return,
-            minibatch.v,
-            minibatch.v_n,
-            minibatch.pi
-        ]
-        args = [model] + list(map(tf.convert_to_tensor, tmp_args))
-        self._train(*args)
+    def train(self, model: tf.keras.models.Model, sample: PPOSample) -> None:
+        sample_size = len(sample)
+        assert self._batch_size < sample_size
+
+        for _ in range(self._num_epoch):
+            idx = np.random.randint(sample_size, size=self._batch_size)
+
+            tmp_args = [
+                sample.observation[idx],
+                sample.action[idx],
+                sample.n_step_return,
+                sample.v,
+                sample.v_n,
+                sample.pi
+            ]
+
+            def indexing(value: np.ndarray) -> np.ndarray:
+                return value[idx]
+
+            args = [model] + \
+                list(map(tf.convert_to_tensor, map(indexing, tmp_args)))
+            self._train(*args)
 
     @tf.function
     def _train(

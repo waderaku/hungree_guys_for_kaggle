@@ -1,11 +1,6 @@
 from abc import ABC, abstractmethod
 
-import numpy as np
-import tensorflow as tf
-from geese.agent.mcts import MCTS
-from geese.constants import ACTIONLIST
 from geese.structure import Observation
-from kaggle_environments.envs.hungry_geese.hungry_geese import Action
 
 
 class Agent(ABC):

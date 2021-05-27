@@ -6,8 +6,8 @@ from collections import deque
 from geese.controller.ppo_helper import calc_reward, calc_n_step_return
 from geese.structure.observation import Observation
 from geese.structure.ppo_parameter import PPOParameter as ppp
-from geese.trainer.minibatch import PPOMiniBatch
-from geese.env import Env
+from geese.structure.sample import Sample
+from geese.env.vecenv.vecenv import VecEnv
 from geese.agent.model.model import BaseModel
 from geese.agent.ppo_agent import PPOAgent
 from geese.constants import NUM_GEESE
@@ -24,15 +24,15 @@ class PPOController():
 
     def train(self):
         agent = PPOAgent(BaseModel())
-        env = Env()
-        obs = env.reset()
+        vec_env = VecEnv()
+        obs = vec_env.reset()
         done = True
         reward_q = deque()
         index = 0
         while done:
             action, value, prob = agent.step(
                 np.array(obs))
-            next_obs, reward, done = env.step(action)
+            next_obs, reward, done = vec_env.step(action)
 
             done = sum(done) == NUM_GEESE
 
@@ -48,7 +48,7 @@ class PPOController():
             n_step_return = calc_n_step_return(
                 reward_q, self._PPOParameter.gunnma)
             reward_q.popleft()
-        PPOMiniBatch(obs, action,)
+        Sample(obs, action,)
 
     def _update_PPO_list(
         self,

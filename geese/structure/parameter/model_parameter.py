@@ -1,7 +1,8 @@
 from typing import Tuple
+from geese.structure.parameter.parameter import Parameter
 
 
-class TFModuleParameter:
+class TFModuleParameter(Parameter):
     pass
 
 

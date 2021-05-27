@@ -1,5 +1,5 @@
 from abc import ABC
 
 
-class MiniBatch(ABC):
+class Parameter(ABC):
     pass
