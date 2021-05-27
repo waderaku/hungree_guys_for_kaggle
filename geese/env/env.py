@@ -19,8 +19,8 @@ class Env:
         self._env.step(actions)
         reward = [self._env.env.state[p]["reward"]
                   for p in range(len(actions))]
-        done = [True if self._env.env.state[p]["status"] != "ACTIVE"
-                else False for p in range(Env.N_ACTION)]
+        done = [self._env.env.state[p]["status"] != "ACTIVE"
+                for p in range(Env.N_ACTION)]
         return [self._env.observation(p) for p in range(Env.N_ACTION)], reward, done
 
     def __str__(self) -> str:
