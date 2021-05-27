@@ -55,5 +55,5 @@ class Env:
     def __str__(self) -> str:
         return str(self._env)
 
-    def _rank2int(self, rank: int) -> float:
+    def _rank2reward(self, rank: int) -> float:
         return self._reward_list[rank - 1]
