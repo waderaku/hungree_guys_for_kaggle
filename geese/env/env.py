@@ -5,6 +5,7 @@ from geese.constants import NUM_GEESE
 from geese.env.dena_env import Environment as DenaEnv
 from geese.structure import Observation, Reward
 from geese.structure.parameter import EnvParameter
+from geese.util.converter import rank2int
 from kaggle_environments.envs.hungry_geese.hungry_geese import Action
 from scipy.stats import rankdata
 
