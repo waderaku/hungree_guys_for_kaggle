@@ -1,41 +1,88 @@
-from geese.structure import Observation
-from geese.controller.ppo_controller import PPOController
-from typing import Deque, List
-from geese.constants import ACTIONLIST, NUM_GEESE
+from collections import deque
+from typing import Any, Deque, List
+
+from geese.structure.parameter.ppo_parameter import PPOParameter
 import numpy as np
 
 
-def create_train_data():
-    pass
+def calc_n_step_return(reward_q: List[Deque], gunnma: np.ndarray) -> List[float]:
+    return [np.sum(np.array(r_q)*gunnma) for r_q in reward_q]
 
 
-def calc_n_step_return(reward_q: Deque, gunnma: np.ndarray) -> np.ndarray:
-    return np.sum(np.array(reward_q)*gunnma)
-
-
-def calc_reward(
-    done: bool,
-    reward: np.ndarray,
-    param_reward: List[float]
-) -> List[float]:
-    default_reward = [0]*NUM_GEESE
-    if done:
-        rank_list = np.argsort(reward)
-        for rank, r in zip(rank_list, param_reward):
-            default_reward[rank] = r
-
-    return default_reward
-
-
-def _update_PPO_list(
-    ppo_controller: PPOController,
-    obs: List[Observation],
-    action: List[ACTIONLIST],
-    value: np.ndarray,
-    prob: np.ndarray
+def update_PPO_list(
+    ppo_parameter: PPOParameter,
+    obs: List[np.ndarray],
+    action: List[np.ndarray],
+    n_step_return: List[np.ndarray],
+    value: List[np.ndarray],
+    value_n: List[np.ndarray],
+    prob: List[np.ndarray],
+    player_done_list: List[bool]
 ) -> None:
-    for i in range()
-    ppo_controller.obs_list.append(obs)
-    ppo_controller.action_list.append(action)
-    ppo_controller.v_list.append(value)
-    ppo_controller.pi_list.append(prob)
+    ppo_parameter.obs_list.extend(
+        [o for o, d in zip(obs, player_done_list) if d])
+    ppo_parameter.action_list.extend(
+        [a for a, d in zip(action, player_done_list) if d])
+    ppo_parameter.n_step_return_list.extend(
+        [n for n, d in zip(n_step_return, player_done_list) if d])
+    ppo_parameter.v_list.extend(
+        [v for v, d in zip(value, player_done_list) if d])
+    ppo_parameter.v_n_list.extend(
+        [v_n for v_n, d in zip(value_n, player_done_list) if d])
+    ppo_parameter.pi_list.extend(
+        [p for p, d in zip(prob, player_done_list) if d])
+
+
+def create_que_list(
+    index_1: int,
+    index_2: int
+) -> List[List[Deque]]:
+    return [[deque()
+             for _ in range(index_2)]
+            for __ in range(index_1)]
+
+
+def reset_que(index: int) -> List[Deque]:
+    return [deque()
+            for _ in range(index)]
+
+
+def reset_train_data(ppo_parameter: PPOParameter) -> None:
+    ppo_parameter.obs_list = []
+    ppo_parameter.action_list = []
+    ppo_parameter.n_step_return_list = []
+    ppo_parameter.v_list = []
+    ppo_parameter.v_n_list = []
+    ppo_parameter.pi_list = []
+
+
+def add_to_que(traget_que_list: List[List[Deque]], add_data_list: List[List[Any]]):
+    [[t_q.append(a_d) for t_q, a_d in zip(target_q, add_data)] for target_q,
+     add_data in zip(traget_que_list, add_data_list)]
+
+
+def create_padding_data(
+    ppo_parameter: PPOParameter,
+    obs_q: Deque,
+    action_q: Deque,
+    reward_q: Deque,
+    value_q: Deque,
+    prob_q: Deque
+):
+    for _ in range(ppo_parameter.num_step):
+        obs = obs_q.popleft()
+        action = action_q.popleft()
+        n_step_return = calc_n_step_return([reward_q])[0]
+        reward_q.popleft()
+        reward_q.append(0)
+        value = value_q.popleft()
+        prob = prob_q.popleft()
+        update_PPO_list(
+            ppo_parameter,
+            [obs],
+            [action],
+            [n_step_return],
+            [value],
+            [0],
+            [prob]
+        )
