@@ -20,17 +20,17 @@ def update_PPO_list(
     player_done_list: List[bool]
 ) -> None:
     ppo_parameter.obs_list.extend(
-        [o for o, d in zip(obs, player_done_list) if d])
+        [o for o, d in zip(obs, player_done_list) if not d])
     ppo_parameter.action_list.extend(
-        [a for a, d in zip(action, player_done_list) if d])
+        [a for a, d in zip(action, player_done_list) if not d])
     ppo_parameter.n_step_return_list.extend(
-        [n for n, d in zip(n_step_return, player_done_list) if d])
+        [n for n, d in zip(n_step_return, player_done_list) if not d])
     ppo_parameter.v_list.extend(
-        [v for v, d in zip(value, player_done_list) if d])
+        [v for v, d in zip(value, player_done_list) if not d])
     ppo_parameter.v_n_list.extend(
-        [v_n for v_n, d in zip(value_n, player_done_list) if d])
+        [v_n for v_n, d in zip(value_n, player_done_list) if not d])
     ppo_parameter.pi_list.extend(
-        [p for p, d in zip(prob, player_done_list) if d])
+        [p for p, d in zip(prob, player_done_list) if not d])
 
 
 def create_que_list(
@@ -72,7 +72,7 @@ def create_padding_data(
     for _ in range(ppo_parameter.num_step):
         obs = obs_q.popleft()
         action = action_q.popleft()
-        n_step_return = calc_n_step_return([reward_q])[0]
+        n_step_return = calc_n_step_return([reward_q], ppo_parameter.gamma)[0]
         reward_q.popleft()
         reward_q.append(0)
         value = value_q.popleft()
@@ -84,5 +84,6 @@ def create_padding_data(
             [n_step_return],
             [value],
             [0],
-            [prob]
+            [prob],
+            [False]
         )

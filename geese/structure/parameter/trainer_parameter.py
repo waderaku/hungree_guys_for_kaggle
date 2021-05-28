@@ -6,11 +6,19 @@ class TrainerParameter(Parameter):
 
 
 class PPOTrainerParameter(TrainerParameter):
-    def __init__(self, learning_rate: float, batch_size: int, num_epoch: int, clip_eps: float):
+    def __init__(
+        self,
+        learning_rate: float,
+        batch_size: int,
+        num_epoch: int,
+        clip_eps: float,
+        entropy_coefficient: float,
+    ):
         self._learning_rate = learning_rate
         self._batch_size = batch_size
         self._num_epoch = num_epoch
         self._clip_eps = clip_eps
+        self._entropy_coefficent = entropy_coefficient
 
     @property
     def learning_rate(self) -> float:
@@ -27,3 +35,7 @@ class PPOTrainerParameter(TrainerParameter):
     @property
     def clip_eps(self) -> float:
         return self._clip_eps
+
+    @property
+    def entropy_coefficient(self) -> float:
+        return self._entropy_coefficent

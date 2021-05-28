@@ -1,0 +1,24 @@
+# Controller Parameter
+NUM_PARALLELS = 32
+NUM_STEP = 32
+MIN_SAMPLE_SIZE = 128 * 10
+
+# Learning Parameter
+LEARNING_RATE = 1e-3
+BATCH_SIZE = 128
+NUM_EPOCH = 10
+CLIP_EPS = 0.2
+GAMMA = 0.99
+ENTROPY_COEFFICIENT = 0.01
+
+# Env Parameter
+REWARD_LIST = [1.0, 0.5, -0.5, -1]
+
+# Model Parameter
+NUM_LAYERS = 12
+NUM_FILTERS = 32
+KERNEL_SIZE = (3, 3)
+BATCH_NORMALIZATION = True
+
+# GPU (Only CPU for now)
+USE_GPU = True

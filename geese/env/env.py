@@ -7,7 +7,6 @@ from geese.structure import Observation, Reward
 from geese.structure.parameter import EnvParameter
 from geese.util.converter import action2int
 from kaggle_environments.envs.hungry_geese.hungry_geese import Action
-from scipy.stats import rankdata
 
 
 class Env:
@@ -33,9 +32,8 @@ class Env:
                          == "ACTIVE" for p in range(NUM_GEESE)])
 
         # 順位に基づくRawRewardの計算
-        rank = rankdata([self._env.env.state[p]["reward"]
-                         for p in range(len(actions))])
-        raw_reward = np.array(list(map(self._rank2reward, rank)))
+        raw_reward = np.array(self._compute_reward([self._env.env.state[p]["reward"]
+                                                    for p in range(len(actions))]))
 
         # 前回生きていて(1 - pre_done)今回死んだ(done)GooseにのみRewardをリターン
         reward: list = ((1 - pre_done) * done * raw_reward).tolist()
@@ -51,5 +49,10 @@ class Env:
     def __str__(self) -> str:
         return str(self._env)
 
-    def _rank2reward(self, rank: int) -> float:
-        return self._reward_list[rank - 1]
+    def _compute_reward(self, raw_rewards: List[float]) -> int:
+        target = [(i, v) for i, v in zip(range(len(raw_rewards)), raw_rewards)]
+        target.sort(key=lambda x: x[1], reverse=True)
+        ans = [0 for _ in range(len(raw_rewards))]
+        for i, _ in target:
+            ans[i] = self._reward_list[i]
+        return ans

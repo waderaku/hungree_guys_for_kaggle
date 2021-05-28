@@ -1,23 +1,24 @@
-import tensorflow as tf
-import numpy as np
-from typing import Tuple, List
+from typing import List, Tuple
 
-from geese.structure import Observation
+import numpy as np
+import tensorflow as tf
 from geese.agent import Agent
 from geese.constants import ACTIONLIST
+from geese.structure import Observation
+from geese.structure.parameter.agent_parameter import AgentParameter
 from kaggle_environments.envs.hungry_geese.hungry_geese import Action
 
 
 class PPOAgent(Agent):
     def __init__(
         self,
-        model: tf.keras.models.Model
+        parameter: AgentParameter
     ):
-        self._model = model
+        self._model = parameter.model
 
     # return Tuple([4], [4], [4*4])
     def step(self, obs: np.ndarray) -> Tuple[List[Action], np.ndarray, np.ndarray]:
-        prob_list, value_list = self._model(obs)
+        prob_list, value_list = self._model(np.array(obs))
         prob_list = prob_list.numpy()
         value_list = value_list.numpy()
         next_action_list = [np.random.choice(ACTIONLIST, p=prob)

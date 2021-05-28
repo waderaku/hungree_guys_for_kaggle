@@ -15,12 +15,14 @@ from geese.constants import NUM_GEESE
 class PPOController():
     def __init__(self, ppo_parameter: PPOParameter):
         self._ppo_parameter = ppo_parameter
+        self._agent = PPOAgent(ppo_parameter.agent_parameter)
 
     def train(self) -> None:
         ppo_trainer = PPOTrainer(self._ppo_parameter.ppo_trainer_parameter)
-        agent = PPOAgent(BaseModel())
         vec_env = VecEnv(self._ppo_parameter.num_parallels,
                          self._ppo_parameter.env_parameter)
+        agent = self._agent
+
         obs_list = vec_env.reset()
 
         obs_q_list = create_que_list(
@@ -79,13 +81,13 @@ class PPOController():
                 [
                     create_padding_data(
                         self._ppo_parameter,
-                        obs_q_list[i],
-                        action_q_list[i],
-                        reward_q_list[i],
-                        value_q_list[i],
-                        prob_q_list[i]
+                        obs_q_list[i][j],
+                        action_q_list[i][j],
+                        reward_q_list[i][j],
+                        value_q_list[i][j],
+                        prob_q_list[i][j]
                     )
-                    for (done, before_done) in enumerate(zip(done_list[i], before_done_list[i]))
+                    for j, (done, before_done) in enumerate(zip(done_list[i], before_done_list[i]))
                     if done != before_done
                 ]
 
@@ -97,7 +99,7 @@ class PPOController():
                 else:
                     before_done_list[i] = done_list[i]
 
-            if step % self._ppo_parameter.train_step == 0:
+            if len(self._ppo_parameter.obs_list) > self._ppo_parameter.num_sample_size:
                 ppo_sample = PPOSample(
                     np.array(self._ppo_parameter.obs_list),
                     np.array(self._ppo_parameter.action_list),
