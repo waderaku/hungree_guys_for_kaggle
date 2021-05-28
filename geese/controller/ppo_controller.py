@@ -2,7 +2,8 @@
 import numpy as np
 from geese.util.converter import action2int
 from geese.trainer.ppo_trainer import PPOTrainer
-from geese.controller.ppo_helper import add_to_que, calc_n_step_return, create_padding_data, create_que_list, reset_que, reset_train_data, update_PPO_list
+from geese.controller.ppo_helper import add_to_que, calc_n_step_return, create_padding_data, \
+    create_que_list, reset_que, reset_train_data, update_PPO_list
 from geese.structure.parameter.ppo_parameter import PPOParameter
 from geese.structure.sample import PPOSample
 from geese.env.vecenv.vecenv import VecEnv
@@ -15,7 +16,7 @@ class PPOController():
     def __init__(self, ppo_parameter: PPOParameter):
         self._ppo_parameter = ppo_parameter
 
-    def train(self):
+    def train(self) -> None:
         ppo_trainer = PPOTrainer(self._ppo_parameter.ppo_trainer_parameter)
         agent = PPOAgent(BaseModel())
         vec_env = VecEnv(self._ppo_parameter.num_parallels,

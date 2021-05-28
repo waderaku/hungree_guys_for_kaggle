@@ -3,5 +3,5 @@ from abc import ABC, abstractmethod
 
 class Controller(ABC):
     @abstractmethod
-    def run(self):
+    def train(self) -> None:
         raise NotImplementedError
