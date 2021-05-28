@@ -14,5 +14,8 @@ class VecEnv:
     def reset(self) -> List[List[Observation]]:
         return [env.reset() for env in self._envs]
 
-    def step(self, action_list: List[List[Action]]) -> Tuple[List[List[Observation]], List[List[Reward]], List[List[bool]]]:
+    def step(
+        self,
+        action_list: List[List[Action]]
+    ) -> Tuple[List[List[Observation]], List[List[Reward]], List[List[bool]]]:
         return tuple(zip(*[env.step(action) for env, action in zip(self._envs, action_list)]))
