@@ -5,8 +5,8 @@ from geese.structure.parameter.ppo_parameter import PPOParameter
 import numpy as np
 
 
-def calc_n_step_return(reward_q: List[Deque], gunnma: np.ndarray) -> List[float]:
-    return [np.sum(np.array(r_q)*gunnma) for r_q in reward_q]
+def calc_n_step_return(reward_q: List[Deque], gamma: np.ndarray) -> List[float]:
+    return [np.sum(np.array(r_q)*gamma) for r_q in reward_q]
 
 
 def update_PPO_list(
@@ -56,7 +56,7 @@ def reset_train_data(ppo_parameter: PPOParameter) -> None:
     ppo_parameter.pi_list = []
 
 
-def add_to_que(traget_que_list: List[List[Deque]], add_data_list: List[List[Any]]):
+def add_to_que(traget_que_list: List[List[Deque]], add_data_list: List[List[Any]]) -> None:
     [[t_q.append(a_d) for t_q, a_d in zip(target_q, add_data)] for target_q,
      add_data in zip(traget_que_list, add_data_list)]
 
@@ -68,7 +68,7 @@ def create_padding_data(
     reward_q: Deque,
     value_q: Deque,
     prob_q: Deque
-):
+) -> None:
     for _ in range(ppo_parameter.num_step):
         obs = obs_q.popleft()
         action = action_q.popleft()

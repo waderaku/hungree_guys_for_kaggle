@@ -10,13 +10,13 @@ class PPOParameter(Parameter):
         num_parallels: int,
         env_parameter: EnvParameter,
         num_step: int,
-        gunnma: float,
+        gamma: float,
         train_step: int
     ):
         self._num_parallels = num_parallels
         self._env_parameter = env_parameter
         self._num_step = num_step
-        self._gunnma = self._create_gunnma(gunnma, num_step)
+        self._gamma = self._create_gamma(gamma, num_step)
         self._train_step = train_step
 
         self._obs_list = []
@@ -26,8 +26,8 @@ class PPOParameter(Parameter):
         self._v_n_list = []
         self._pi_list = []
 
-    def _create_gunnma(gunnma: float, num_step: int) -> np.ndarray:
-        return np.geomspace(1, gunnma**(num_step)-1, num_step)
+    def _create_gamma(gamma: float, num_step: int) -> np.ndarray:
+        return np.geomspace(1, gamma**(num_step)-1, num_step)
 
     @ property
     def num_parallels(self) -> int:
@@ -42,8 +42,8 @@ class PPOParameter(Parameter):
         return self._num_step
 
     @ property
-    def gunnma(self) -> np.ndarray:
-        return self._gunnma
+    def gamma(self) -> np.ndarray:
+        return self._gamma
 
     @ property
     def train_step(self) -> int:

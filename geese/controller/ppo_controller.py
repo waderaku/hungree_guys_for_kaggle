@@ -49,7 +49,7 @@ class PPOController():
             for i, (reward_q, value_q) in enumerate(zip(reward_q_list, value_q_list)):
                 if len(reward_q[0]) > self._ppo_parameter.num_step:
                     n_step_return_list = calc_n_step_return(
-                        reward_q, self._ppo_parameter.gunnma)
+                        reward_q, self._ppo_parameter.gamma)
                     [r_q.popleft() for r_q in reward_q]
                     o = [o_q.popleft() for o_q in obs_q_list[i]]
                     a = [action2int(a_q.popleft()) for a_q in action_q_list[i]]
