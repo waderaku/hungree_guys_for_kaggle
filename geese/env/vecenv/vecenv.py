@@ -1,7 +1,9 @@
-from geese.structure.parameter.env_parameter import EnvParameter
+from typing import List, Tuple
+
 from geese.env.env import Env
 from geese.structure import Observation, Reward
-from typing import List, Tuple
+from geese.structure.parameter.env_parameter import EnvParameter
+from kaggle_environments.envs.hungry_geese.hungry_geese import Action
 
 
 class VecEnv:
@@ -12,5 +14,8 @@ class VecEnv:
     def reset(self) -> List[List[Observation]]:
         return [env.reset() for env in self._envs]
 
-    def step(self, action_list: List[List[Observation]]) -> Tuple[List[List[Observation]], List[List[Reward]], List[List[bool]]]:
-        return [env.step(action) for env, action in zip(self._envs, action_list)]
+    def step(
+        self,
+        action_list: List[List[Action]]
+    ) -> Tuple[List[List[Observation]], List[List[Reward]], List[List[bool]]]:
+        return tuple(zip(*[env.step(action) for env, action in zip(self._envs, action_list)]))
