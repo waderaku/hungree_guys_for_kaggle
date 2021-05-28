@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from typing import Tuple
+from typing import Tuple, List
 
 from geese.structure import Observation
 from geese.agent import Agent
@@ -15,12 +15,14 @@ class PPOAgent(Agent):
     ):
         self._model = model
 
-    def step(self, obs: Observation) -> Tuple[Action, float, np.ndarray]:
-        prob, value = self._model(obs)
-        prob = prob.numpy()[0]
-        value = value.numpy()[0]
-        next_action = np.random.choice(ACTIONLIST, p=prob)
-        return next_action, value, prob
+    # return Tuple([4], [4], [4*4])
+    def step(self, obs: np.ndarray) -> Tuple[List[Action], np.ndarray, np.ndarray]:
+        prob_list, value_list = self._model(obs)
+        prob_list = prob_list.numpy()
+        value_list = value_list.numpy()
+        next_action_list = [np.random.choice(ACTIONLIST, p=prob)
+                            for prob in prob_list]
+        return next_action_list, value_list, prob_list
 
     def get_action(self, obs: Observation) -> Action:
         next_action, _, _ = self.step(obs)
