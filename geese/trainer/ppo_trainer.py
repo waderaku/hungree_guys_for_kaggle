@@ -76,10 +76,10 @@ class PPOTrainer(Trainer):
                 )
             )
             # B
-            logit = tf.reduce_mean(tf.math.log(pi_new * action))
+            logit = tf.math.log(tf.reduce_sum(pi_new * action, axis=-1))
 
             # TFは勾配降下しかできないので、最大化したい目的関数の逆符号の最小化を行う
-            loss_policy = -clipped_advantage * logit
+            loss_policy = -tf.reduce_mean(clipped_advantage * logit)
 
             # Value Lossの計算
             loss_value = tf.reduce_mean(

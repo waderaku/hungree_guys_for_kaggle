@@ -1,5 +1,6 @@
 from collections import deque
 import copy
+from geese.constants import ACTIONLIST
 from geese.structure.train_data import TrainData
 from geese.util.converter import action2int
 from typing import Any, Deque, List
@@ -106,6 +107,6 @@ def create_padding_data(
 
     # ダミーデータの投入
     obs_q.append(obs)
-    action_q.append(action)
+    action_q.append(ACTIONLIST[0])
     value_q.append(value)
     prob_q.append(prob_q)
