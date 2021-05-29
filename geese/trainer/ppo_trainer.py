@@ -86,7 +86,7 @@ class PPOTrainer(Trainer):
                 tf.keras.losses.MSE(advantage - v_old_n, v_new))
 
             # Entropy Lossの計算
-            loss_entropy = -tf.reduce_mean(tf.reduce_sum(
+            loss_entropy = tf.reduce_mean(tf.reduce_sum(
                 pi_new * tf.math.log(pi_new), axis=-1)) * self._entropy_coefficient
 
             loss_total = loss_policy + loss_value + loss_entropy
