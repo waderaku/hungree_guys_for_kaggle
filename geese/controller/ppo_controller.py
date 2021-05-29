@@ -1,4 +1,5 @@
 
+from geese.structure.train_data import TrainData
 import numpy as np
 from geese.util.converter import action2int
 from geese.trainer.ppo_trainer import PPOTrainer
@@ -18,6 +19,7 @@ class PPOController():
         self._agent = PPOAgent(ppo_parameter.agent_parameter)
 
     def train(self) -> None:
+        train_data = TrainData([], [], [], [], [], [])
         ppo_trainer = PPOTrainer(self._ppo_parameter.ppo_trainer_parameter)
         vec_env = VecEnv(self._ppo_parameter.num_parallels,
                          self._ppo_parameter.env_parameter)
@@ -42,7 +44,7 @@ class PPOController():
 
         while True:
             action_list, value_n_list, prob_list =\
-                tuple(zip(*[agent.step(obs)for obs in obs_list]))
+                tuple(zip(*[agent.step(obs) for obs in obs_list]))
 
             next_obs_list, reward_list, done_list = vec_env.step(action_list)
 
@@ -59,7 +61,7 @@ class PPOController():
                     p = [p_q.popleft() for p_q in prob_q_list[i]]
 
                     update_PPO_list(
-                        self._ppo_parameter,
+                        train_data,
                         o,
                         a,
                         n_step_return_list,
@@ -81,6 +83,7 @@ class PPOController():
                 [
                     create_padding_data(
                         self._ppo_parameter,
+                        train_data,
                         obs_q_list[i][j],
                         action_q_list[i][j],
                         reward_q_list[i][j],
@@ -94,6 +97,7 @@ class PPOController():
                 if game_done_list[i]:
                     # queのリセット
                     obs_q_list[i] = reset_que(NUM_GEESE)
+                    action_q_list[i] = reset_que(NUM_GEESE)
                     reward_q_list[i] = reset_que(NUM_GEESE)
                     value_q_list[i] = reset_que(NUM_GEESE)
                     prob_q_list[i] = reset_que(NUM_GEESE)
@@ -101,14 +105,14 @@ class PPOController():
                 else:
                     before_done_list[i] = done_list[i]
 
-            if len(self._ppo_parameter.obs_list) > self._ppo_parameter.num_sample_size:
+            if len(train_data.obs_list) > self._ppo_parameter.num_sample_size:
                 ppo_sample = PPOSample(
-                    np.array(self._ppo_parameter.obs_list),
-                    np.array(self._ppo_parameter.action_list),
-                    np.array(self._ppo_parameter.n_step_return_list),
-                    np.array(self._ppo_parameter.v_list),
-                    np.array(self._ppo_parameter.v_n_list),
-                    np.array(self._ppo_parameter.pi_list)
+                    np.array(train_data.obs_list),
+                    np.array(train_data.action_list),
+                    np.array(train_data.n_step_return_list),
+                    np.array(train_data.v_list),
+                    np.array(train_data.v_n_list),
+                    np.array(train_data.pi_list)
                 )
                 ppo_trainer.train(agent.model, ppo_sample)
 
