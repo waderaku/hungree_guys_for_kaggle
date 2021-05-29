@@ -32,12 +32,18 @@ class BaseModel(tf.keras.models.Model):
 class TorusConv2d(tf.keras.layers.Layer):
     def __init__(self, parameter: TorusConv2dParameter):
         super().__init__()
+        self._use_gpu = parameter.use_gpu
+        if parameter.use_gpu:
+            data_format = "channels_first"
+        else:
+            data_format = "channels_last"
+
         self._edge_size = (
             parameter.kernel_size[0] // 2, parameter.kernel_size[1] // 2)
         self._conv = tf.keras.layers.Conv2D(
             filters=parameter.num_filters,
             kernel_size=parameter.kernel_size,
-            data_format="channels_first",
+            data_format=data_format,
         )
         self._bn = tf.keras.layers.BatchNormalization() if parameter.bn else None
 
@@ -46,7 +52,11 @@ class TorusConv2d(tf.keras.layers.Layer):
                         x, x[:, :, :, :self._edge_size[1]]], axis=3)
         out = tf.concat([out[:, :, -self._edge_size[0]:], out,
                         out[:, :, :self._edge_size[0]]], axis=2)
+        if not self._use_gpu:
+            out = tf.transpose(out, [0, 2, 3, 1])
         out = self._conv(out)
+        if not self._use_gpu:
+            out = tf.transpose(out, [0, 3, 1, 2])
         if self._bn is not None:
             out = self._bn(out)
         return out
