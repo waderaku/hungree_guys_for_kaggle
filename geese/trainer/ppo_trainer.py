@@ -68,7 +68,7 @@ class PPOTrainer(Trainer):
                 action * pi_new, axis=-1)) / tf.reduce_sum(action * pi_old, axis=-1)
             # B
             clipped_advantage = tf.minimum(
-                policy_rate,
+                policy_rate * advantage,
                 tf.clip_by_value(
                     policy_rate * advantage,
                     (1 - self._clip_eps) * advantage,
@@ -83,7 +83,7 @@ class PPOTrainer(Trainer):
 
             # Value Lossの計算
             loss_value = tf.reduce_mean(
-                tf.keras.losses.MSE(advantage + v_old_n, v_new))
+                tf.keras.losses.MSE(advantage - v_old_n, v_new))
 
             # Entropy Lossの計算
             loss_entropy = -tf.reduce_mean(tf.reduce_sum(
