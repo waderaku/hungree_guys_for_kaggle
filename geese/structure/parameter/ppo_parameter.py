@@ -33,7 +33,7 @@ class PPOParameter(Parameter):
         self._pi_list = []
 
     def _create_gamma(self, gamma: float, num_step: int) -> np.ndarray:
-        return np.geomspace(1, gamma**(num_step)-1, num_step)
+        return np.geomspace(1, gamma**(num_step-1), num_step)
 
     @ property
     def num_parallels(self) -> int:

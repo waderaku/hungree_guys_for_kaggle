@@ -1,4 +1,5 @@
 from collections import deque
+import copy
 from typing import Any, Deque, List
 
 from geese.structure.parameter.ppo_parameter import PPOParameter
@@ -69,12 +70,25 @@ def create_padding_data(
     value_q: Deque,
     prob_q: Deque
 ) -> None:
-    for _ in range(ppo_parameter.num_step):
+
+    if len(obs_q) != len(action_q) or len(obs_q) != len(value_q) or len(obs_q) != len(prob_q):
+
+        print('aa')
+
+    if len(reward_q) != ppo_parameter.num_step:
+        target_reward_q = copy.deepcopy(reward_q)
+        while len(target_reward_q) != ppo_parameter.num_step:
+            target_reward_q.append(0)
+    else:
+        target_reward_q = reward_q
+
+    for _ in range(len(obs_q)):
         obs = obs_q.popleft()
         action = action_q.popleft()
-        n_step_return = calc_n_step_return([reward_q], ppo_parameter.gamma)[0]
-        reward_q.popleft()
-        reward_q.append(0)
+        n_step_return = calc_n_step_return(
+            [target_reward_q], ppo_parameter.gamma)[0]
+        target_reward_q.popleft()
+        target_reward_q.append(0)
         value = value_q.popleft()
         prob = prob_q.popleft()
         update_PPO_list(

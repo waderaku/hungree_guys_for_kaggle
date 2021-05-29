@@ -22,14 +22,14 @@ class Env:
     def step(self, actions: List[Action]) -> Tuple[List[Observation], List[Reward], List[bool]]:
         # 今回死ぬGooseを判定するために、１個前のStateですでに死んでいるかどうかを保持
         pre_done = np.array([self._env.env.state[p]["status"]
-                             == "ACTIVE" for p in range(NUM_GEESE)])
+                             != "ACTIVE" for p in range(NUM_GEESE)])
         actions = {p: action2int(actions[p]) for p in range(NUM_GEESE)}
         # Envを次の状態へ遷移させる
         self._env.step(actions)
 
         # Gooseごとの終了判定
         done = np.array([self._env.env.state[p]["status"]
-                         == "ACTIVE" for p in range(NUM_GEESE)])
+                         != "ACTIVE" for p in range(NUM_GEESE)])
 
         # 順位に基づくRawRewardの計算
         raw_reward = np.array(self._compute_reward([self._env.env.state[p]["reward"]

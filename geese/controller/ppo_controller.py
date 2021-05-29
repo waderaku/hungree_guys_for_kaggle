@@ -49,7 +49,7 @@ class PPOController():
             game_done_list = [sum(done) == NUM_GEESE for done in done_list]
 
             for i, (reward_q, value_q) in enumerate(zip(reward_q_list, value_q_list)):
-                if len(reward_q[0]) > self._ppo_parameter.num_step:
+                if len(reward_q[0]) == self._ppo_parameter.num_step:
                     n_step_return_list = calc_n_step_return(
                         reward_q, self._ppo_parameter.gamma)
                     [r_q.popleft() for r_q in reward_q]
@@ -57,7 +57,6 @@ class PPOController():
                     a = [action2int(a_q.popleft()) for a_q in action_q_list[i]]
                     v = [v_q.popleft() for v_q in value_q]
                     p = [p_q.popleft() for p_q in prob_q_list[i]]
-                    o = [o_q.popleft() for o_q in obs_q_list[i]]
 
                     update_PPO_list(
                         self._ppo_parameter,
@@ -70,13 +69,14 @@ class PPOController():
                         before_done_list[i]
                     )
 
-                # n回分の行動をキューで管理
-                add_to_que(obs_q_list, obs_list)
-                add_to_que(action_q_list, action_list)
-                add_to_que(value_q_list, value_n_list)
-                add_to_que(reward_q_list, reward_list)
-                add_to_que(prob_q_list, prob_list)
+            # n回分の行動をキューで管理
+            add_to_que(obs_q_list, obs_list)
+            add_to_que(action_q_list, action_list)
+            add_to_que(value_q_list, value_n_list)
+            add_to_que(reward_q_list, reward_list)
+            add_to_que(prob_q_list, prob_list)
 
+            for i, (reward_q, value_q) in enumerate(zip(reward_q_list, value_q_list)):
                 # 今回終了したアクションに対してパディングを行ってデータを格納する
                 [
                     create_padding_data(
@@ -93,8 +93,10 @@ class PPOController():
 
                 if game_done_list[i]:
                     # queのリセット
-                    reward_q_list[i] = reset_que()
-                    value_q_list[i] = reset_que()
+                    obs_q_list[i] = reset_que(NUM_GEESE)
+                    reward_q_list[i] = reset_que(NUM_GEESE)
+                    value_q_list[i] = reset_que(NUM_GEESE)
+                    prob_q_list[i] = reset_que(NUM_GEESE)
                     before_done_list[i] = [False]*NUM_GEESE
                 else:
                     before_done_list[i] = done_list[i]

@@ -1,6 +1,6 @@
 # Controller Parameter
 NUM_PARALLELS = 32
-NUM_STEP = 32
+NUM_STEP = 34
 MIN_SAMPLE_SIZE = 128 * 10
 
 # Learning Parameter
