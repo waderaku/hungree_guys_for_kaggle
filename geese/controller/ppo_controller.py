@@ -1,10 +1,12 @@
 
+from geese.structure.parameter import ppo_parameter
 from geese.structure.train_data import TrainData
 import numpy as np
+from itertools import chain
 from geese.util.converter import action2int
 from geese.trainer.ppo_trainer import PPOTrainer
 from geese.controller.ppo_helper import add_to_que, calc_n_step_return, create_padding_data, \
-    create_que_list, reset_que, reset_train_data, update_PPO_list
+    create_que_list, reset_que, reset_train_data, reshape_step_list, update_PPO_list
 from geese.structure.parameter.ppo_parameter import PPOParameter
 from geese.structure.sample import PPOSample
 from geese.env.vecenv.vecenv import VecEnv
@@ -44,7 +46,8 @@ class PPOController():
 
         while True:
             action_list, value_n_list, prob_list =\
-                tuple(zip(*[agent.step(obs) for obs in obs_list]))
+                reshape_step_list(*agent.step(
+                    list(chain.from_iterable(obs_list))))
 
             next_obs_list, reward_list, done_list = vec_env.step(action_list)
 

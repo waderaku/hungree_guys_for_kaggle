@@ -1,9 +1,11 @@
 from collections import deque
 import copy
-from geese.constants import ACTIONLIST
+
+from kaggle_environments.envs.hungry_geese.hungry_geese import Action
+from geese.constants import ACTIONLIST, NUM_GEESE
 from geese.structure.train_data import TrainData
 from geese.util.converter import action2int
-from typing import Any, Deque, List
+from typing import Any, Deque, List, Tuple
 
 from geese.structure.parameter.ppo_parameter import PPOParameter
 import numpy as np
@@ -110,3 +112,18 @@ def create_padding_data(
     action_q.append(ACTIONLIST[0])
     value_q.append(value)
     prob_q.append(prob_q)
+
+
+def reshape_step_list(
+    action_list: List[Action],
+    value_n_list: np.ndarray,
+    prob_list: np.ndarray
+) -> Tuple[List[List[Action]], List[np.ndarray], List[np.ndarray]]:
+    reshape_action_list = [action_list[i:i + NUM_GEESE]
+                           for i in range(0, len(action_list), NUM_GEESE)]
+    reshape_value_n_list = [value_n_list[i:i + NUM_GEESE]
+                            for i in range(0, len(value_n_list), NUM_GEESE)]
+    reshape_prob_list = [prob_list[i:i + NUM_GEESE]
+                         for i in range(0, len(prob_list), NUM_GEESE)]
+
+    return reshape_action_list, reshape_value_n_list, reshape_prob_list
