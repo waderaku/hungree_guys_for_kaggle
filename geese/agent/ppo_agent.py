@@ -18,7 +18,7 @@ class PPOAgent(Agent):
         self._model = parameter.model
 
     # return Tuple([4], [4], [4*4])
-    def step(self, obs: np.ndarray) -> Tuple[List[Action], np.ndarray, np.ndarray]:
+    def step(self, obs: List[np.ndarray]) -> Tuple[List[Action], np.ndarray, np.ndarray]:
         prob_list, value_list = self._model(np.array(obs))
         prob_list = prob_list.numpy()
         value_list = value_list.numpy()
