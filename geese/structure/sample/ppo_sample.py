@@ -36,7 +36,7 @@ class PPOSample(Sample):
 
     @property
     def v(self) -> np.ndarray:
-        return self._v_0
+        return self._v
 
     @property
     def v_n(self) -> np.ndarray:
