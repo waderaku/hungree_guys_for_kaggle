@@ -31,9 +31,12 @@ class Env:
         done = np.array([self._env.env.state[p]["status"]
                          != "ACTIVE" for p in range(NUM_GEESE)])
 
+        # Envの報酬
+        env_reward = [self._env.env.state[p]["reward"]
+                      for p in range(len(actions))]
+
         # 順位に基づくRawRewardの計算
-        raw_reward = np.array(self._compute_reward([self._env.env.state[p]["reward"]
-                                                    for p in range(len(actions))]))
+        raw_reward = np.array(self._compute_reward(env_reward))
 
         # 前回生きていて(1 - pre_done)今回死んだ(done)GooseにのみRewardをリターン
         reward: list = ((1 - pre_done) * done * raw_reward).tolist()
@@ -49,10 +52,24 @@ class Env:
     def __str__(self) -> str:
         return str(self._env)
 
-    def _compute_reward(self, raw_rewards: List[float]) -> int:
-        target = [(i, v) for i, v in zip(range(len(raw_rewards)), raw_rewards)]
-        target.sort(key=lambda x: x[1], reverse=True)
-        ans = [0 for _ in range(len(raw_rewards))]
-        for i, _ in target:
-            ans[i] = self._reward_list[i]
-        return ans
+    def _compute_reward(self, env_rewards: List[float]) -> List[Reward]:
+        # env_rewardが小さい順に(index, env_reward)を格納したリスト
+        target = [(i, v) for i, v in zip(range(len(env_rewards)), env_rewards)]
+        target.sort(key=lambda x: x[1])
+
+        # 順位配列（スコアが等しいときは繰り下げ順位を適用）
+        charge = 1
+        rank = NUM_GEESE
+        state = -1
+        rank_array = [None for _ in range(len(target))]
+        for i, v in target:
+            if state != v:
+                rank -= charge
+                charge = 1
+                state = v
+            else:
+                charge += 1
+            assert 0 <= rank < NUM_GEESE
+            rank_array[i] = rank
+
+        return [self._reward_list[rank] for rank in rank_array]
