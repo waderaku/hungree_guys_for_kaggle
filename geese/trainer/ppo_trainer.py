@@ -5,6 +5,8 @@ import tensorflow as tf
 from geese.trainer.trainer import Trainer
 from geese.structure.sample import PPOSample
 from geese.structure.parameter import PPOTrainerParameter
+from geese.constants import ACTIONLIST
+from geese.util.converter import type32
 
 
 class PPOTrainer(Trainer):
@@ -15,6 +17,7 @@ class PPOTrainer(Trainer):
         self._num_epoch = parameter.num_epoch
         self._clip_eps = parameter.clip_eps
         self._entropy_coefficient = parameter.entropy_coefficient
+        self._n_action = len(ACTIONLIST)
 
     def train(self, model: tf.keras.models.Model, sample: PPOSample) -> None:
         sample_size = len(sample)
@@ -24,8 +27,8 @@ class PPOTrainer(Trainer):
             idx = np.random.randint(sample_size, size=self._batch_size)
 
             tmp_args = [
-                sample.observation[idx],
-                sample.action[idx],
+                sample.observation,
+                sample.action,
                 sample.n_step_return,
                 sample.v,
                 sample.v_n,
@@ -36,10 +39,10 @@ class PPOTrainer(Trainer):
                 return value[idx]
 
             args = [model] + \
-                list(map(tf.convert_to_tensor, map(indexing, tmp_args)))
+                list(map(type32, map(tf.convert_to_tensor, map(indexing, tmp_args))))
             self._train(*args)
 
-    @tf.function
+    # @tf.function
     def _train(
         self,
         model: tf.keras.models.Model,
@@ -56,6 +59,10 @@ class PPOTrainer(Trainer):
             # Policy Lossの計算
             # B, A
             advantage = n_step_return + v_old_n - v_old
+
+            # B, A
+            action = tf.one_hot(action, depth=self._n_action, dtype=tf.float32)
+
             # B
             policy_rate = tf.stop_gradient(tf.reduce_sum(
                 action * pi_new, axis=-1)) / tf.reduce_sum(action * pi_old, axis=-1)
