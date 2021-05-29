@@ -19,6 +19,7 @@ import os
 if not USE_GPU:
     os.environ["CUDA_VISIBLE_DEVICE"] = "-1"
 from geese.controller.ppo_controller import PPOController
+from geese.constants import NO_GPU_MSG
 from geese.structure.parameter import (
     AgentParameter,
     EnvParameter,
@@ -30,11 +31,16 @@ from geese.agent.model import BaseModel
 
 
 if __name__ == "__main__":
+    if USE_GPU:
+        import tensorflow as tf
+        assert tf.test.is_gpu_available(), NO_GPU_MSG
+
     model = BaseModel(BaseModelParameter(
         num_layers=NUM_LAYERS,
         num_filters=NUM_FILTERS,
         kernel_size=KERNEL_SIZE,
         bn=BATCH_NORMALIZATION,
+        use_gpu=USE_GPU
     ))
 
     agent_parameter = AgentParameter(model=model)

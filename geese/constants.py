@@ -13,3 +13,5 @@ ACTIONLIST = [Action.NORTH,
 NUM_GEESE = 4
 
 TIME_LIMIT = 1.0
+
+NO_GPU_MSG = "GPU is not available."
