@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 
 from geese.structure import Observation
+from kaggle_environments.envs.hungry_geese.hungry_geese import Observation as KaggleObservation
+from kaggle_environments.envs.hungry_geese.hungry_geese import Action
 
 
 class Agent(ABC):
@@ -19,4 +21,8 @@ class Agent(ABC):
     @property
     @abstractmethod
     def model(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def __call__(self, obs: KaggleObservation) -> Action:
         raise NotImplementedError

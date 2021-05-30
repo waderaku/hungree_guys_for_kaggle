@@ -120,7 +120,7 @@ class PPOController():
                 ppo_trainer.train(agent.model, ppo_sample)
 
                 # trainに投げたデータ全削除
-                reset_train_data(self._ppo_parameter)
+                reset_train_data(train_data)
 
             obs_list = next_obs_list
             step += 1
