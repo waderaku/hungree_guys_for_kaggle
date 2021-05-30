@@ -6,7 +6,6 @@ from typing import List
 class TrainData():
     obs_list: List
     action_list: List
-    n_step_return_list: List
+    gae_list: List
     v_list: List
-    v_n_list: List
     pi_list: List

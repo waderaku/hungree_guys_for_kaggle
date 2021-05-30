@@ -8,16 +8,14 @@ class PPOSample(Sample):
         self,
         observation: np.ndarray,
         action: np.ndarray,
-        n_step_return: np.ndarray,
+        gae: np.ndarray,
         v: np.ndarray,
-        v_n: np.ndarray,
         pi: np.ndarray
     ):
         self._observation = observation
         self._action = action
-        self._n_step_return = n_step_return
+        self._gae = gae
         self._v = v
-        self._v_n = v_n
         self._pi = pi
         self._size = self._observation.shape[0]
         self._check_size()
@@ -31,16 +29,12 @@ class PPOSample(Sample):
         return self._action
 
     @property
-    def n_step_return(self) -> np.ndarray:
-        return self._n_step_return
+    def gae(self) -> np.ndarray:
+        return self._gae
 
     @property
     def v(self) -> np.ndarray:
         return self._v
-
-    @property
-    def v_n(self) -> np.ndarray:
-        return self._v_n
 
     @property
     def pi(self) -> np.ndarray:
@@ -52,7 +46,6 @@ class PPOSample(Sample):
     def _check_size(self) -> None:
         size = self._size
         assert self._action.shape[0] == size
-        assert self._n_step_return.shape[0] == size
+        assert self._gae.shape[0] == size
         assert self._v.shape[0] == size
-        assert self._v_n.shape[0] == size
         assert self._pi.shape[0] == size

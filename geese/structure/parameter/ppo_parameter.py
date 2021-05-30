@@ -1,6 +1,5 @@
 from geese.structure.parameter import PPOTrainerParameter
 import numpy as np
-from typing import List
 from geese.structure.parameter import Parameter
 from geese.structure.parameter import EnvParameter
 from geese.structure.parameter import AgentParameter
@@ -12,6 +11,7 @@ class PPOParameter(Parameter):
         num_parallels: int,
         num_step: int,
         gamma: float,
+        param_lambda: float,
         num_sample_size: int,
         ppo_trainer_parameter: PPOTrainerParameter,
         env_parameter: EnvParameter,
@@ -20,13 +20,14 @@ class PPOParameter(Parameter):
         self._num_parallels = num_parallels
         self._env_parameter = env_parameter
         self._num_step = num_step
-        self._gamma = self._create_gamma(gamma, num_step)
+        self._gamma = gamma
+        self._gae_param = self._create_gae_param(gamma, param_lambda, num_step)
         self._num_sample_size = num_sample_size
         self._ppo_trainer_parameter = ppo_trainer_parameter
         self._agent_parameter = agent_parameter
 
-    def _create_gamma(self, gamma: float, num_step: int) -> np.ndarray:
-        return np.geomspace(1, gamma**(num_step-1), num_step)
+    def _create_gae_param(self, gamma: float, param_lambda: float, num_step: int) -> np.ndarray:
+        return np.geomspace(1, (gamma*param_lambda)**(num_step-1), num_step)
 
     @ property
     def num_parallels(self) -> int:
