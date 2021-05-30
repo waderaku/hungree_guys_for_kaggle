@@ -9,6 +9,7 @@ BATCH_SIZE = 128
 NUM_EPOCH = 3
 CLIP_EPS = 0.2
 GAMMA = 0.99
+LAMBDA = 1.0
 ENTROPY_COEFFICIENT = 1
 
 # Env Parameter
@@ -21,4 +22,4 @@ KERNEL_SIZE = (3, 3)
 BATCH_NORMALIZATION = True
 
 # GPU (Only CPU for now)
-USE_GPU = True
+USE_GPU = False
