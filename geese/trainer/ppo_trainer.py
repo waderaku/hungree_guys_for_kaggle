@@ -31,9 +31,8 @@ class PPOTrainer(Trainer):
             tmp_args = [
                 sample.observation,
                 sample.action,
-                sample.n_step_return,
+                sample.gae,
                 sample.v,
-                sample.v_n,
                 sample.pi
             ]
 
@@ -50,18 +49,14 @@ class PPOTrainer(Trainer):
         model: tf.keras.models.Model,
         observation: tf.Tensor,
         action: tf.Tensor,
-        n_step_return: tf.Tensor,
+        advantage: tf.Tensor,
         v_old: tf.Tensor,
-        v_old_n: tf.Tensor,
         pi_old: tf.Tensor
     ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
         with tf.GradientTape() as tape:
             # B, A and B
             pi_new, v_new = model(observation)
             # Policy Lossの計算
-            # B, A
-            advantage = n_step_return + v_old_n - v_old
-
             # B, A
             action = tf.one_hot(action, depth=self._n_action, dtype=tf.float32)
 

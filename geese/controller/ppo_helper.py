@@ -11,17 +11,27 @@ from geese.structure.parameter.ppo_parameter import PPOParameter
 import numpy as np
 
 
-def calc_n_step_return(reward_q: List[Deque], gamma: np.ndarray) -> List[float]:
-    return [np.sum(np.array(r_q)*gamma) for r_q in reward_q]
+def calc_gae(delta_q: List[Deque], gae_param: np.ndarray) -> List[float]:
+    return [np.sum(np.array(d_q)*gae_param) for d_q in delta_q]
+
+
+def add_delta(
+    delta_que: List[Deque],
+    reward_list: List[float],
+    v_old_list: List[float],
+    v_new_list: List[float],
+    gamma: float
+) -> None:
+    [d_q.append(reward+v_new*gamma-v_old) for reward, v_old,
+     v_new, d_q in zip(reward_list, v_old_list, v_new_list, delta_que)]
 
 
 def update_PPO_list(
     train_data: TrainData,
     obs: List[np.ndarray],
     action: List[np.ndarray],
-    n_step_return: List[np.ndarray],
+    gae_list: List[np.ndarray],
     value: List[np.ndarray],
-    value_n: List[np.ndarray],
     prob: List[np.ndarray],
     player_done_list: List[bool]
 ) -> None:
@@ -29,12 +39,10 @@ def update_PPO_list(
         [o for o, d in zip(obs, player_done_list) if not d])
     train_data.action_list.extend(
         [a for a, d in zip(action, player_done_list) if not d])
-    train_data.n_step_return_list.extend(
-        [n for n, d in zip(n_step_return, player_done_list) if not d])
+    train_data.gae_list.extend(
+        [gae for gae, d in zip(gae_list, player_done_list) if not d])
     train_data.v_list.extend(
         [v for v, d in zip(value, player_done_list) if not d])
-    train_data.v_n_list.extend(
-        [v_n for v_n, d in zip(value_n, player_done_list) if not d])
     train_data.pi_list.extend(
         [p for p, d in zip(prob, player_done_list) if not d])
 
@@ -56,9 +64,8 @@ def reset_que(index: int) -> List[Deque]:
 def reset_train_data(train_data: TrainData) -> None:
     train_data.obs_list = []
     train_data.action_list = []
-    train_data.n_step_return_list = []
+    train_data.gae_list = []
     train_data.v_list = []
-    train_data.v_n_list = []
     train_data.pi_list = []
 
 
@@ -72,7 +79,7 @@ def create_padding_data(
     train_data: TrainData,
     obs_q: Deque,
     action_q: Deque,
-    reward_q: Deque,
+    delta_q: Deque,
     value_q: Deque,
     prob_q: Deque
 ) -> None:
@@ -80,29 +87,30 @@ def create_padding_data(
     if len(obs_q) != len(action_q) or len(obs_q) != len(value_q) or len(obs_q) != len(prob_q):
         raise ValueError
 
-    if len(reward_q) != ppo_parameter.num_step:
-        target_reward_q = copy.deepcopy(reward_q)
-        while len(target_reward_q) != ppo_parameter.num_step:
-            target_reward_q.append(0)
+    if len(delta_q) != ppo_parameter.num_step:
+        target_delta_q = copy.deepcopy(delta_q)
+        add_delta([target_delta_q], [0], [value_q[-1]],
+                  [0], ppo_parameter.gamma)
+        while len(target_delta_q) != ppo_parameter.num_step:
+            target_delta_q.append(0)
     else:
-        target_reward_q = reward_q
+        target_delta_q = delta_q
 
     for _ in range(len(obs_q)):
         obs = obs_q.popleft()
         action = action2int(action_q.popleft())
-        n_step_return = calc_n_step_return(
-            [target_reward_q], ppo_parameter.gamma)[0]
-        target_reward_q.popleft()
-        target_reward_q.append(0)
+        gae = calc_gae(
+            [target_delta_q], ppo_parameter.gamma)[0]
+        target_delta_q.popleft()
+        target_delta_q.append(0)
         value = value_q.popleft()
         prob = prob_q.popleft()
         update_PPO_list(
             train_data,
             [obs],
             [action],
-            [n_step_return],
+            [gae],
             [value],
-            [0.0],
             [prob],
             [False]
         )
@@ -118,6 +126,8 @@ def reshape_step_list(
     action_list: List[Action],
     value_n_list: np.ndarray,
     prob_list: np.ndarray
+
+
 ) -> Tuple[List[List[Action]], List[np.ndarray], List[np.ndarray]]:
     reshape_action_list = [action_list[i:i + NUM_GEESE]
                            for i in range(0, len(action_list), NUM_GEESE)]
