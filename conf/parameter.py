@@ -10,7 +10,7 @@ NUM_EPOCH = 3
 CLIP_EPS = 0.2
 GAMMA = 0.99
 LAMBDA = 1.0
-ENTROPY_COEFFICIENT = 1
+ENTROPY_COEFFICIENT = 0.001
 
 # Env Parameter
 REWARD_LIST = [1.0, 0.5, -0.5, -1]
@@ -22,7 +22,7 @@ KERNEL_SIZE = (3, 3)
 BATCH_NORMALIZATION = True
 
 # GPU (Only CPU for now)
-USE_GPU = False
+USE_GPU = True
 
 # Save Info
 SAVE_FREQ = 100

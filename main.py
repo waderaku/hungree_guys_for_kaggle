@@ -20,7 +20,7 @@ from conf.parameter import (
 )
 import os
 if not USE_GPU:
-    os.environ["CUDA_VISIBLE_DEVICE"] = "-1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from geese.controller.ppo_controller import PPOController
 from geese.constants import NO_GPU_MSG
 from geese.structure.parameter import (
