@@ -1,13 +1,18 @@
-import tensorflow as tf
-from geese.structure.parameter import BaseModelParameter, TorusConv2dParameter
-from geese.constants import ACTIONLIST
+from __future__ import annotations
 
+from dataclasses import asdict
 from typing import Tuple
 
+import tensorflow as tf
+from geese.constants import ACTIONLIST
+from geese.structure.parameter import BaseModelParameter, TorusConv2dParameter
 
+
+@tf.keras.utils.register_keras_serializable()
 class BaseModel(tf.keras.models.Model):
     def __init__(self, parameter: BaseModelParameter):
         super().__init__()
+        self._parameter = parameter
         self._init_block = TorusConv2d(parameter.torusconv2d_parameter)
         self._blocks = [TorusConv2d(parameter.torusconv2d_parameter)
                         for _ in range(parameter.num_layers)]
@@ -25,13 +30,22 @@ class BaseModel(tf.keras.models.Model):
         v = self._head_v(flatten)
         p = tf.keras.activations.softmax(p)
         v = tf.keras.activations.tanh(v)
-        v = tf.reshape(v, (-1))
+        v = tf.squeeze(v, axis=-1)
         return p, v
+
+    def get_config(self) -> dict:
+        return asdict(self._parameter)
+
+    @classmethod
+    def from_config(cls, config: dict) -> BaseModel:
+        parameter = BaseModelParameter(**config)
+        return BaseModel(parameter)
 
 
 class TorusConv2d(tf.keras.layers.Layer):
     def __init__(self, parameter: TorusConv2dParameter):
         super().__init__()
+        self._parameter = parameter
         self._use_gpu = parameter.use_gpu
         if parameter.use_gpu:
             data_format = "channels_first"
@@ -60,3 +74,11 @@ class TorusConv2d(tf.keras.layers.Layer):
         if self._bn is not None:
             out = self._bn(out)
         return out
+
+    def get_config(self) -> dict:
+        return asdict(self._parameter)
+
+    @classmethod
+    def from_config(cls, config: dict) -> TorusConv2d:
+        parameter = TorusConv2dParameter(**config)
+        return TorusConv2d(parameter)

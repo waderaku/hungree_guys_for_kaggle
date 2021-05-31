@@ -1,19 +1,24 @@
 
-from geese.structure.train_data import TrainData
-import numpy as np
 from itertools import chain
-from geese.util.converter import action2int
-from geese.trainer.ppo_trainer import PPOTrainer
-from geese.controller.ppo_helper import add_delta, add_to_que, calc_gae, create_padding_data, \
-    create_que_list, reset_que, reset_train_data, reshape_step_list, update_PPO_list
-from geese.structure.parameter.ppo_parameter import PPOParameter
-from geese.structure.sample import PPOSample
-from geese.env.vecenv.vecenv import VecEnv
+from pathlib import Path
+
+import numpy as np
 from geese.agent.ppo_agent import PPOAgent
 from geese.constants import NUM_GEESE
+from geese.controller.controller import Controller
+from geese.controller.ppo_helper import (add_delta, add_to_que, calc_gae,
+                                         create_padding_data, create_que_list,
+                                         reset_que, reset_train_data,
+                                         reshape_step_list, update_PPO_list)
+from geese.env.vecenv.vecenv import VecEnv
+from geese.structure.parameter.ppo_parameter import PPOParameter
+from geese.structure.sample import PPOSample
+from geese.structure.train_data import TrainData
+from geese.trainer.ppo_trainer import PPOTrainer
+from geese.util.converter import action2int
 
 
-class PPOController():
+class PPOController(Controller):
     def __init__(self, ppo_parameter: PPOParameter):
         self._ppo_parameter = ppo_parameter
         self._agent = PPOAgent(ppo_parameter.agent_parameter)
@@ -134,3 +139,8 @@ class PPOController():
             value_o_list = value_n_list
             obs_list = next_obs_list
             step += 1
+            # Save
+            if step % self._ppo_parameter.save_freq == 0 and self._ppo_parameter.save_dir is not None:
+                save_dir = Path(
+                    self._ppo_parameter.save_dir).joinpath(str(step))
+                self._agent.save(str(save_dir))

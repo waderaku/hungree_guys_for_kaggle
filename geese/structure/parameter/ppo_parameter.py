@@ -13,16 +13,20 @@ class PPOParameter(Parameter):
         gamma: float,
         param_lambda: float,
         num_sample_size: int,
+        save_freq: int,
+        save_dir: str,
         ppo_trainer_parameter: PPOTrainerParameter,
         env_parameter: EnvParameter,
         agent_parameter: AgentParameter
     ):
         self._num_parallels = num_parallels
-        self._env_parameter = env_parameter
         self._num_step = num_step
         self._gamma = gamma
         self._gae_param = self._create_gae_param(gamma, param_lambda, num_step)
         self._num_sample_size = num_sample_size
+        self._save_freq = save_freq
+        self._save_dir = save_dir
+        self._env_parameter = env_parameter
         self._ppo_trainer_parameter = ppo_trainer_parameter
         self._agent_parameter = agent_parameter
 
@@ -48,6 +52,14 @@ class PPOParameter(Parameter):
     @ property
     def num_sample_size(self) -> int:
         return self._num_sample_size
+
+    @property
+    def save_freq(self):
+        return self._save_freq
+
+    @property
+    def save_dir(self):
+        return self._save_dir
 
     @property
     def ppo_trainer_parameter(self) -> PPOTrainerParameter:

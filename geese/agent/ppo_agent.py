@@ -35,7 +35,10 @@ class PPOAgent(Agent):
         return next_action[0]
 
     def save(self, path: str) -> None:
-        self._model.save(path)
+        if self._model.built:
+            self._model.save(path)
+        else:
+            print("Model is not yet built. Skipping saving proceduce.")
 
     def load(self, path: str) -> None:
         self._model = tf.keras.models.load_model(path)
@@ -44,7 +47,7 @@ class PPOAgent(Agent):
     def model(self) -> tf.keras.models.Model:
         return self._model
 
-    def __call__(self, obs: KaggleObservation) -> Action:
+    def __call__(self, obs: KaggleObservation) -> str:
         np_obs = to_np_obs(obs, self._last_obs)
         action = self.get_action(np_obs)
-        return action
+        return action.name

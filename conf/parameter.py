@@ -23,3 +23,7 @@ BATCH_NORMALIZATION = True
 
 # GPU (Only CPU for now)
 USE_GPU = False
+
+# Save Info
+SAVE_FREQ = 10
+SAVE_DIR = "./trained_models"
