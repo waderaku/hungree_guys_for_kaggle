@@ -1,11 +1,9 @@
-from geese.structure.parameter import Parameter
+from dataclasses import dataclass
 from typing import List
 
+from geese.structure.parameter import Parameter
 
+
+@dataclass(frozen=True)
 class EnvParameter(Parameter):
-    def __init__(self, reward_list: List[float]):
-        self._reward_list = reward_list
-
-    @property
-    def reward_list(self) -> float:
-        return self._reward_list
+    reward_list: List[float]
