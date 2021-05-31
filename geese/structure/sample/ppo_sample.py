@@ -1,51 +1,26 @@
-import numpy as np
+from dataclasses import dataclass
 
+import numpy as np
 from geese.structure.sample.sample import Sample
 
 
+@dataclass(frozen=True)
 class PPOSample(Sample):
-    def __init__(
-        self,
-        observation: np.ndarray,
-        action: np.ndarray,
-        gae: np.ndarray,
-        v: np.ndarray,
-        pi: np.ndarray
-    ):
-        self._observation = observation
-        self._action = action
-        self._gae = gae
-        self._v = v
-        self._pi = pi
-        self._size = self._observation.shape[0]
+    observation: np.ndarray
+    action: np.ndarray
+    gae: np.ndarray
+    v: np.ndarray
+    pi: np.ndarray
+
+    def __post_init__(self):
         self._check_size()
 
-    @property
-    def observation(self) -> np.ndarray:
-        return self._observation
-
-    @property
-    def action(self) -> np.ndarray:
-        return self._action
-
-    @property
-    def gae(self) -> np.ndarray:
-        return self._gae
-
-    @property
-    def v(self) -> np.ndarray:
-        return self._v
-
-    @property
-    def pi(self) -> np.ndarray:
-        return self._pi
-
-    def __len__(self) -> int:
-        return self._size
-
     def _check_size(self) -> None:
-        size = self._size
-        assert self._action.shape[0] == size
-        assert self._gae.shape[0] == size
-        assert self._v.shape[0] == size
-        assert self._pi.shape[0] == size
+        size = self.observation.shape[0]
+        assert self.action.shape[0] == size
+        assert self.gae.shape[0] == size
+        assert self.v.shape[0] == size
+        assert self.pi.shape[0] == size
+
+    def __len__(self):
+        return self.observation.shape[0]

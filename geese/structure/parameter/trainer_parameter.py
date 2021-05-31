@@ -1,5 +1,6 @@
-from geese.structure.parameter.parameter import Parameter
 from dataclasses import dataclass
+
+from geese.structure.parameter.parameter import Parameter
 
 
 class TrainerParameter(Parameter):

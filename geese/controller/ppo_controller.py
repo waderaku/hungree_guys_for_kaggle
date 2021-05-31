@@ -74,7 +74,7 @@ class PPOController(Controller):
                     p = [p_q.popleft() for p_q in prob_q_list[i]]
 
                     gae = calc_gae(delta_q_list[i],
-                                   self._ppo_parameter._gae_param)
+                                   self._ppo_parameter.gae_param)
                     [d_q.popleft() for d_q in delta_q_list[i]]
 
                     update_PPO_list(
