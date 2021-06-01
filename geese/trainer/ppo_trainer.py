@@ -43,7 +43,7 @@ class PPOTrainer(Trainer):
                 list(map(type32, map(tf.convert_to_tensor, map(indexing, tmp_args))))
             self._train(*args)
 
-    # @tf.function
+    @tf.function
     def _train(
         self,
         model: tf.keras.models.Model,

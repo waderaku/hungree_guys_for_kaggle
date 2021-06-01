@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from geese.structure.parameter.parameter import Parameter
 
 
@@ -5,37 +7,10 @@ class TrainerParameter(Parameter):
     pass
 
 
+@dataclass(frozen=True)
 class PPOTrainerParameter(TrainerParameter):
-    def __init__(
-        self,
-        learning_rate: float,
-        batch_size: int,
-        num_epoch: int,
-        clip_eps: float,
-        entropy_coefficient: float,
-    ):
-        self._learning_rate = learning_rate
-        self._batch_size = batch_size
-        self._num_epoch = num_epoch
-        self._clip_eps = clip_eps
-        self._entropy_coefficent = entropy_coefficient
-
-    @property
-    def learning_rate(self) -> float:
-        return self._learning_rate
-
-    @property
-    def batch_size(self) -> int:
-        return self._batch_size
-
-    @property
-    def num_epoch(self) -> int:
-        return self._num_epoch
-
-    @property
-    def clip_eps(self) -> float:
-        return self._clip_eps
-
-    @property
-    def entropy_coefficient(self) -> float:
-        return self._entropy_coefficent
+    learning_rate: float
+    batch_size: int
+    num_epoch: int
+    clip_eps: float
+    entropy_coefficient: float

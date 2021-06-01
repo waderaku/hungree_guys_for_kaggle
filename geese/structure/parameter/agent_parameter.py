@@ -1,11 +1,9 @@
-from geese.structure.parameter.parameter import Parameter
+from dataclasses import dataclass
+
 import tensorflow as tf
+from geese.structure.parameter.parameter import Parameter
 
 
+@dataclass
 class AgentParameter(Parameter):
-    def __init__(self, model: tf.keras.models.Model):
-        self._model = model
-
-    @property
-    def model(self) -> tf.keras.models.Model:
-        return self._model
+    model: tf.keras.models.Model
