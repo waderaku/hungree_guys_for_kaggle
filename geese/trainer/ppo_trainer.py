@@ -7,12 +7,13 @@ from geese.structure.sample import PPOSample
 from geese.structure.parameter import PPOTrainerParameter
 from geese.constants import ACTIONLIST
 from geese.util.converter import type32
+from geese.util.tensor_boad_logger import TensorBoardLogger
 
 EPS = 1e-9
 
 
 class PPOTrainer(Trainer):
-    def __init__(self, parameter: PPOTrainerParameter):
+    def __init__(self, parameter: PPOTrainerParameter, logger: TensorBoardLogger):
         self._optimizer = tf.keras.optimizers.Adam(
             learning_rate=parameter.learning_rate)
         self._batch_size = parameter.batch_size
@@ -20,6 +21,7 @@ class PPOTrainer(Trainer):
         self._clip_eps = parameter.clip_eps
         self._entropy_coefficient = parameter.entropy_coefficient
         self._n_action = len(ACTIONLIST)
+        self._logger = logger
 
     def train(self, model: tf.keras.models.Model, sample: PPOSample) -> None:
         sample_size = len(sample)
@@ -41,7 +43,10 @@ class PPOTrainer(Trainer):
 
             args = [model] + \
                 list(map(type32, map(tf.convert_to_tensor, map(indexing, tmp_args))))
-            self._train(*args)
+            loss_policy, loss_value, loss_entropy = self._train(*args)
+            self._logger.logging_scaler('loss_policy', loss_policy)
+            self._logger.logging_scaler('loss_value', loss_value)
+            self._logger.logging_scaler('loss_entropy', loss_entropy)
 
     @tf.function
     def _train(
