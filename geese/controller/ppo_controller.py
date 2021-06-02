@@ -1,10 +1,14 @@
 
+from geese.util.tensor_boad_logger import TensorBoardLogger
 from itertools import chain
 from pathlib import Path
 
 import numpy as np
+import tensorflow as tf
+import datetime
+
 from geese.agent.ppo_agent import PPOAgent
-from geese.constants import NUM_GEESE
+from geese.constants import LOG_BASE_DIR, NUM_GEESE
 from geese.controller.controller import Controller
 from geese.controller.ppo_helper import (add_delta, add_to_que, calc_gae,
                                          create_padding_data, create_que_list,
@@ -24,8 +28,12 @@ class PPOController(Controller):
         self._agent = PPOAgent(ppo_parameter.agent_parameter)
 
     def train(self) -> None:
+        today = datetime.datetime.now().strftime('%Y-%m-%d')
+        logger = TensorBoardLogger(f'{LOG_BASE_DIR}/{today}')
+
         train_data = TrainData([], [], [], [], [])
-        ppo_trainer = PPOTrainer(self._ppo_parameter.ppo_trainer_parameter)
+        ppo_trainer = PPOTrainer(
+            self._ppo_parameter.ppo_trainer_parameter, logger)
         vec_env = VecEnv(self._ppo_parameter.num_parallels,
                          self._ppo_parameter.env_parameter)
         agent = self._agent
