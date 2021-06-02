@@ -4,7 +4,6 @@ from itertools import chain
 from pathlib import Path
 
 import numpy as np
-import tensorflow as tf
 import datetime
 
 from geese.agent.ppo_agent import PPOAgent
@@ -28,7 +27,7 @@ class PPOController(Controller):
         self._agent = PPOAgent(ppo_parameter.agent_parameter)
 
     def train(self) -> None:
-        today = datetime.datetime.now().strftime('%Y-%m-%d')
+        today = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
         logger = TensorBoardLogger(f'{LOG_BASE_DIR}/{today}')
 
         train_data = TrainData([], [], [], [], [])
@@ -148,7 +147,8 @@ class PPOController(Controller):
             obs_list = next_obs_list
             step += 1
             # Save
-            if step % self._ppo_parameter.save_freq == 0 and self._ppo_parameter.save_dir is not None:
+            if step % self._ppo_parameter.save_freq == 0 \
+                    and self._ppo_parameter.save_dir is not None:
                 save_dir = Path(
                     self._ppo_parameter.save_dir).joinpath(str(step))
                 self._agent.save(str(save_dir))
