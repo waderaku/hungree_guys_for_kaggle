@@ -40,7 +40,7 @@ class MCTSAgent(Agent):
         return next_action
 
     def _update_eps(self) -> None:
-        self._eps = np.max([self._eps*self._eps_anneal, self._eps_min])
+        self._eps = np.max([self._eps * self._eps_anneal, self._eps_min])
 
     def save(self, path: str) -> None:
         self._model.save(path)

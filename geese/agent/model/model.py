@@ -14,10 +14,11 @@ class BaseModel(tf.keras.models.Model):
         super().__init__()
         self._parameter = parameter
         self._init_block = TorusConv2d(parameter.torusconv2d_parameter)
-        self._blocks = [TorusConv2d(parameter.torusconv2d_parameter)
-                        for _ in range(parameter.num_layers)]
-        self._head_p = tf.keras.layers.Dense(
-            units=len(ACTIONLIST), use_bias=False)
+        self._blocks = [
+            TorusConv2d(parameter.torusconv2d_parameter)
+            for _ in range(parameter.num_layers)
+        ]
+        self._head_p = tf.keras.layers.Dense(units=len(ACTIONLIST), use_bias=False)
         self._head_v = tf.keras.layers.Dense(units=1, use_bias=False)
         self._flatten = tf.keras.layers.Flatten()
 
@@ -52,8 +53,7 @@ class TorusConv2d(tf.keras.layers.Layer):
         else:
             data_format = "channels_last"
 
-        self._edge_size = (
-            parameter.kernel_size[0] // 2, parameter.kernel_size[1] // 2)
+        self._edge_size = (parameter.kernel_size[0] // 2, parameter.kernel_size[1] // 2)
         self._conv = tf.keras.layers.Conv2D(
             filters=parameter.num_filters,
             kernel_size=parameter.kernel_size,
@@ -62,10 +62,14 @@ class TorusConv2d(tf.keras.layers.Layer):
         self._bn = tf.keras.layers.BatchNormalization() if parameter.bn else None
 
     def call(self, x: tf.Tensor) -> tf.Tensor:
-        out = tf.concat([x[:, :, :, -self._edge_size[1]:],
-                        x, x[:, :, :, :self._edge_size[1]]], axis=3)
-        out = tf.concat([out[:, :, -self._edge_size[0]:], out,
-                        out[:, :, :self._edge_size[0]]], axis=2)
+        out = tf.concat(
+            [x[:, :, :, -self._edge_size[1] :], x, x[:, :, :, : self._edge_size[1]]],
+            axis=3,
+        )
+        out = tf.concat(
+            [out[:, :, -self._edge_size[0] :], out, out[:, :, : self._edge_size[0]]],
+            axis=2,
+        )
         if not self._use_gpu:
             out = tf.transpose(out, [0, 2, 3, 1])
         out = self._conv(out)

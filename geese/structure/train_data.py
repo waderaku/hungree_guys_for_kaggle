@@ -3,7 +3,7 @@ from typing import List
 
 
 @dataclass
-class TrainData():
+class TrainData:
     obs_list: List
     action_list: List
     gae_list: List

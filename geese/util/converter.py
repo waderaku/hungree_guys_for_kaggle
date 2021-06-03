@@ -2,7 +2,9 @@ from geese.constants import FIELD_HEIGHT, FIELD_WIDTH, NUM_CHANNELS
 import numpy as np
 import tensorflow as tf
 from kaggle_environments.envs.hungry_geese.hungry_geese import Action
-from kaggle_environments.envs.hungry_geese.hungry_geese import Observation as KaggleObservation
+from kaggle_environments.envs.hungry_geese.hungry_geese import (
+    Observation as KaggleObservation,
+)
 
 
 def to_np_obs(obs: KaggleObservation, last_obs: KaggleObservation) -> tf.Tensor:

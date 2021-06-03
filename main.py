@@ -19,6 +19,7 @@ from conf.parameter import (
     SAVE_DIR,
 )
 import os
+
 if not USE_GPU:
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from geese.controller.ppo_controller import PPOController
@@ -28,7 +29,7 @@ from geese.structure.parameter import (
     EnvParameter,
     BaseModelParameter,
     PPOTrainerParameter,
-    PPOParameter
+    PPOParameter,
 )
 from geese.agent.model import BaseModel
 
@@ -36,15 +37,18 @@ from geese.agent.model import BaseModel
 if __name__ == "__main__":
     if USE_GPU:
         import tensorflow as tf
+
         assert tf.test.is_gpu_available(), NO_GPU_MSG
 
-    model = BaseModel(BaseModelParameter(
-        num_layers=NUM_LAYERS,
-        num_filters=NUM_FILTERS,
-        kernel_size=KERNEL_SIZE,
-        bn=BATCH_NORMALIZATION,
-        use_gpu=USE_GPU
-    ))
+    model = BaseModel(
+        BaseModelParameter(
+            num_layers=NUM_LAYERS,
+            num_filters=NUM_FILTERS,
+            kernel_size=KERNEL_SIZE,
+            bn=BATCH_NORMALIZATION,
+            use_gpu=USE_GPU,
+        )
+    )
 
     agent_parameter = AgentParameter(model=model)
     trainer_parameter = PPOTrainerParameter(
@@ -52,7 +56,7 @@ if __name__ == "__main__":
         batch_size=BATCH_SIZE,
         num_epoch=NUM_EPOCH,
         clip_eps=CLIP_EPS,
-        entropy_coefficient=ENTROPY_COEFFICIENT
+        entropy_coefficient=ENTROPY_COEFFICIENT,
     )
     env_parameter = EnvParameter(reward_list=REWARD_LIST)
 
@@ -66,7 +70,7 @@ if __name__ == "__main__":
         save_dir=SAVE_DIR,
         env_parameter=env_parameter,
         ppo_trainer_parameter=trainer_parameter,
-        agent_parameter=agent_parameter
+        agent_parameter=agent_parameter,
     )
 
     controller = PPOController(parameter)
