@@ -1,4 +1,3 @@
-
 from geese.util.tensor_boad_logger import TensorBoardLogger
 from itertools import chain
 from pathlib import Path
@@ -9,10 +8,17 @@ import datetime
 from geese.agent.ppo_agent import PPOAgent
 from geese.constants import LOG_BASE_DIR, NUM_GEESE
 from geese.controller.controller import Controller
-from geese.controller.ppo_helper import (add_delta, add_to_que, calc_gae,
-                                         create_padding_data, create_que_list,
-                                         reset_que, reset_train_data,
-                                         reshape_step_list, update_PPO_list)
+from geese.controller.ppo_helper import (
+    add_delta,
+    add_to_que,
+    calc_gae,
+    create_padding_data,
+    create_que_list,
+    reset_que,
+    reset_train_data,
+    reshape_step_list,
+    update_PPO_list,
+)
 from geese.env.vecenv.vecenv import VecEnv
 from geese.structure.parameter.ppo_parameter import PPOParameter
 from geese.structure.sample import PPOSample
@@ -27,40 +33,33 @@ class PPOController(Controller):
         self._agent = PPOAgent(ppo_parameter.agent_parameter)
 
     def train(self) -> None:
-        today = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
-        logger = TensorBoardLogger(f'{LOG_BASE_DIR}/{today}')
+        today = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        logger = TensorBoardLogger(f"{LOG_BASE_DIR}/{today}")
 
         train_data = TrainData([], [], [], [], [])
-        ppo_trainer = PPOTrainer(
-            self._ppo_parameter.ppo_trainer_parameter, logger)
-        vec_env = VecEnv(self._ppo_parameter.num_parallels,
-                         self._ppo_parameter.env_parameter)
+        ppo_trainer = PPOTrainer(self._ppo_parameter.ppo_trainer_parameter, logger)
+        vec_env = VecEnv(
+            self._ppo_parameter.num_parallels, self._ppo_parameter.env_parameter
+        )
         agent = self._agent
 
         obs_list = vec_env.reset()
 
-        obs_q_list = create_que_list(
-            self._ppo_parameter.num_parallels, NUM_GEESE)
-        reward_q_list = create_que_list(
-            self._ppo_parameter.num_parallels, NUM_GEESE)
-        action_q_list = create_que_list(
-            self._ppo_parameter.num_parallels, NUM_GEESE)
-        value_q_list = create_que_list(
-            self._ppo_parameter.num_parallels, NUM_GEESE)
-        prob_q_list = create_que_list(
-            self._ppo_parameter.num_parallels, NUM_GEESE)
-        delta_q_list = create_que_list(
-            self._ppo_parameter.num_parallels, NUM_GEESE)
+        obs_q_list = create_que_list(self._ppo_parameter.num_parallels, NUM_GEESE)
+        reward_q_list = create_que_list(self._ppo_parameter.num_parallels, NUM_GEESE)
+        action_q_list = create_que_list(self._ppo_parameter.num_parallels, NUM_GEESE)
+        value_q_list = create_que_list(self._ppo_parameter.num_parallels, NUM_GEESE)
+        prob_q_list = create_que_list(self._ppo_parameter.num_parallels, NUM_GEESE)
+        delta_q_list = create_que_list(self._ppo_parameter.num_parallels, NUM_GEESE)
 
         step = 0
-        before_done_list = [[False]*NUM_GEESE] * \
-            self._ppo_parameter.num_parallels
-        before_game_done_list = [True]*self._ppo_parameter.num_parallels
+        before_done_list = [[False] * NUM_GEESE] * self._ppo_parameter.num_parallels
+        before_game_done_list = [True] * self._ppo_parameter.num_parallels
         value_o_list = []
         while True:
-            action_list, value_n_list, prob_list =\
-                reshape_step_list(*agent.step(
-                    list(chain.from_iterable(obs_list))))
+            action_list, value_n_list, prob_list = reshape_step_list(
+                *agent.step(list(chain.from_iterable(obs_list)))
+            )
 
             next_obs_list, reward_list, done_list = vec_env.step(action_list)
 
@@ -69,8 +68,13 @@ class PPOController(Controller):
             for i, (reward_q, value_q) in enumerate(zip(reward_q_list, value_q_list)):
 
                 if not before_game_done_list[i]:
-                    add_delta(delta_q_list[i], reward_list[i],
-                              value_o_list[i], value_n_list[i], self._ppo_parameter.gamma)
+                    add_delta(
+                        delta_q_list[i],
+                        reward_list[i],
+                        value_o_list[i],
+                        value_n_list[i],
+                        self._ppo_parameter.gamma,
+                    )
 
                 if len(reward_q[0]) == self._ppo_parameter.num_step:
                     [r_q.popleft() for r_q in reward_q]
@@ -80,19 +84,10 @@ class PPOController(Controller):
                     v = [v_q.popleft() for v_q in value_q]
                     p = [p_q.popleft() for p_q in prob_q_list[i]]
 
-                    gae = calc_gae(delta_q_list[i],
-                                   self._ppo_parameter.gae_param)
+                    gae = calc_gae(delta_q_list[i], self._ppo_parameter.gae_param)
                     [d_q.popleft() for d_q in delta_q_list[i]]
 
-                    update_PPO_list(
-                        train_data,
-                        o,
-                        a,
-                        gae,
-                        v,
-                        p,
-                        before_done_list[i]
-                    )
+                    update_PPO_list(train_data, o, a, gae, v, p, before_done_list[i])
 
             # n回分の行動をキューで管理
             add_to_que(obs_q_list, obs_list)
@@ -112,9 +107,11 @@ class PPOController(Controller):
                         action_q_list[i][j],
                         delta_q_list[i][j],
                         value_q_list[i][j],
-                        prob_q_list[i][j]
+                        prob_q_list[i][j],
                     )
-                    for j, (done, before_done) in enumerate(zip(done_list[i], before_done_list[i]))
+                    for j, (done, before_done) in enumerate(
+                        zip(done_list[i], before_done_list[i])
+                    )
                     if done != before_done
                 ]
 
@@ -126,7 +123,7 @@ class PPOController(Controller):
                     value_q_list[i] = reset_que(NUM_GEESE)
                     prob_q_list[i] = reset_que(NUM_GEESE)
                     delta_q_list[i] = reset_que(NUM_GEESE)
-                    before_done_list[i] = [False]*NUM_GEESE
+                    before_done_list[i] = [False] * NUM_GEESE
                 else:
                     before_done_list[i] = done_list[i]
 
@@ -136,7 +133,7 @@ class PPOController(Controller):
                     np.array(train_data.action_list),
                     np.array(train_data.gae_list),
                     np.array(train_data.v_list),
-                    np.array(train_data.pi_list)
+                    np.array(train_data.pi_list),
                 )
                 ppo_trainer.train(agent.model, ppo_sample)
 
@@ -147,8 +144,9 @@ class PPOController(Controller):
             obs_list = next_obs_list
             step += 1
             # Save
-            if step % self._ppo_parameter.save_freq == 0 \
-                    and self._ppo_parameter.save_dir is not None:
-                save_dir = Path(
-                    self._ppo_parameter.save_dir).joinpath(str(step))
+            if (
+                step % self._ppo_parameter.save_freq == 0
+                and self._ppo_parameter.save_dir is not None
+            ):
+                save_dir = Path(self._ppo_parameter.save_dir).joinpath(str(step))
                 self._agent.save(str(save_dir))
