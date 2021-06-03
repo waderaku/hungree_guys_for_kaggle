@@ -21,7 +21,8 @@ class BaseModelParameter(TFModuleParameter):
     @property
     def torusconv2d_parameter(self) -> TorusConv2dParameter:
         return TorusConv2dParameter(
-            self.num_filters, self.kernel_size, self.bn, self.use_gpu)
+            self.num_filters, self.kernel_size, self.bn, self.use_gpu
+        )
 
 
 @dataclass(frozen=True)

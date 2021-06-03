@@ -1,4 +1,3 @@
-
 from geese.constants import NUM_GEESE, TIME_LIMIT
 
 import tensorflow as tf
@@ -13,11 +12,13 @@ from geese.structure import Observation
 
 
 class MCTS:
-    def __init__(self,
-                 model: tf.keras.models.Model,
-                 env: Env,
-                 cpuct: float = 1.0,
-                 eps: float = 1e-8):
+    def __init__(
+        self,
+        model: tf.keras.models.Model,
+        env: Env,
+        cpuct: float = 1.0,
+        eps: float = 1e-8,
+    ):
         self.model = model
         self._env = env
         self._cpuct = cpuct
@@ -41,8 +42,9 @@ class MCTS:
         s = self._env.get_representation(obs)
         i = obs.index
         counts = [
-            self._num_state_action[(s, i, a)] if (
-                s, i, a) in self._num_state_action else 0
+            self._num_state_action[(s, i, a)]
+            if (s, i, a) in self._num_state_action
+            else 0
             for a in range(self._env.get_action_size())
         ]
         prob = counts / np.sum(counts)
@@ -63,17 +65,20 @@ class MCTS:
 
                 # 葉ノード
                 # model.predictこれで問題ないのか？
-                self._policy_state[(state, i)], value_list[i] = self.model.predict(to_tf_tensor(
-                    obs, i))
+                self._policy_state[(state, i)], value_list[i] = self.model.predict(
+                    to_tf_tensor(obs, i)
+                )
 
-                self._policy_state[(state, i)] = self._policy_state[(
-                    state, i)].numpy()[0]
+                self._policy_state[(state, i)] = self._policy_state[(state, i)].numpy()[
+                    0
+                ]
                 value_list[i] = value_list[i].numpy()[0]
 
                 # 行動可能エリアでフィルターをかける
-                valid_list = self._env.get_valid_moves(obs,  i)
-                self._policy_state[(state, i)] = self._policy_state[(state, i)] * \
-                    valid_list
+                valid_list = self._env.get_valid_moves(obs, i)
+                self._policy_state[(state, i)] = (
+                    self._policy_state[(state, i)] * valid_list
+                )
 
                 # フィルターの結果から、policyの確率変換
                 sum_policy_state = np.sum(self._policy_state[(state, i)])
@@ -91,19 +96,26 @@ class MCTS:
                 continue
 
             valid_list = self._valid_state[(state, i)]
-            cur_best = -float('inf')
+            cur_best = -float("inf")
             best_act = self._env.action_list[-1]
 
             # best_actionの調査
             for a in range(self._env.get_action_size()):
                 if valid_list[a]:
                     if (state, i, a) in self._Q_state_action:
-                        u = self._Q_state_action[(state, i, a)] + self._cpuct *\
-                            self._policy_state[(state, i)][a] * math.sqrt(
-                            self._num_state[state]) / (1 + self._num_state_action[(state, i, a)])
+                        u = self._Q_state_action[
+                            (state, i, a)
+                        ] + self._cpuct * self._policy_state[(state, i)][a] * math.sqrt(
+                            self._num_state[state]
+                        ) / (
+                            1 + self._num_state_action[(state, i, a)]
+                        )
                     else:
-                        u = self._cpuct * self._policy_state[(state, i)][a] * math.sqrt(
-                            self._num_state[state] + self._eps)
+                        u = (
+                            self._cpuct
+                            * self._policy_state[(state, i)][a]
+                            * math.sqrt(self._num_state[state] + self._eps)
+                        )
 
                     if u > cur_best:
                         cur_best = u
@@ -123,10 +135,11 @@ class MCTS:
 
             # Qの更新
             if (state, i, a) in self._Q_state_action:
-                self._Q_state_action[(state, i, a)] = \
-                    (self._num_state_action[(state, i, a)] *
-                     self._Q_state_action[(state, i, a)] + v) / \
-                    (self._num_state_action[(state, i, a)] + 1)
+                self._Q_state_action[(state, i, a)] = (
+                    self._num_state_action[(state, i, a)]
+                    * self._Q_state_action[(state, i, a)]
+                    + v
+                ) / (self._num_state_action[(state, i, a)] + 1)
 
                 self._num_state_action[(state, i, a)] += 1
 

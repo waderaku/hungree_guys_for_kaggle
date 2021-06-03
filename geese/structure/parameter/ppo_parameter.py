@@ -1,5 +1,4 @@
 from dataclasses import InitVar, dataclass, field
-from re import A
 
 import numpy as np
 from geese.structure.parameter import (AgentParameter, EnvParameter, Parameter,

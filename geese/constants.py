@@ -7,8 +7,7 @@ FIELD_WIDTH = 11
 NUM_CHANNELS = 17
 
 # ActionList
-ACTIONLIST = [Action.NORTH,
-              Action.SOUTH, Action.WEST, Action.EAST]
+ACTIONLIST = [Action.NORTH, Action.SOUTH, Action.WEST, Action.EAST]
 
 NUM_GEESE = 4
 
@@ -18,4 +17,4 @@ NO_GPU_MSG = "GPU is not available."
 
 
 # log directory
-LOG_BASE_DIR = 'logs'
+LOG_BASE_DIR = "logs"

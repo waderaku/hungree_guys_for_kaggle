@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 
 from geese.structure import Observation
-from kaggle_environments.envs.hungry_geese.hungry_geese import Observation as KaggleObservation
+from kaggle_environments.envs.hungry_geese.hungry_geese import (
+    Observation as KaggleObservation,
+)
 from kaggle_environments.envs.hungry_geese.hungry_geese import Action
 
 

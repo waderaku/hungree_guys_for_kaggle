@@ -80,6 +80,7 @@ def create_padding_data(
     train_data: TrainData,
     obs_q: Deque,
     action_q: Deque,
+    reward_q: Deque,
     delta_q: Deque,
     value_q: Deque,
     prob_q: Deque,
@@ -92,11 +93,11 @@ def create_padding_data(
     ):
         raise ValueError
 
+    add_delta([delta_q], [reward_q[-1]], [value_q[-1]], [0.0], ppo_parameter.gamma)
     if len(delta_q) != ppo_parameter.num_step:
         target_delta_q = copy.deepcopy(delta_q)
-        add_delta([target_delta_q], [0], [value_q[-1]], [0], ppo_parameter.gamma)
         while len(target_delta_q) != ppo_parameter.num_step:
-            target_delta_q.append(0)
+            target_delta_q.append(0.0)
     else:
         target_delta_q = delta_q
 
@@ -104,8 +105,6 @@ def create_padding_data(
         obs = obs_q.popleft()
         action = action2int(action_q.popleft())
         gae = calc_gae([target_delta_q], ppo_parameter.gamma)[0]
-        target_delta_q.popleft()
-        target_delta_q.append(0)
         value = value_q.popleft()
         prob = prob_q.popleft()
         update_PPO_list(train_data, [obs], [action], [gae], [value], [prob], [False])
@@ -115,6 +114,9 @@ def create_padding_data(
     action_q.append(ACTIONLIST[0])
     value_q.append(value)
     prob_q.append(prob_q)
+
+    # ゴミ捨て
+    delta_q.popleft()
 
 
 def reshape_step_list(
