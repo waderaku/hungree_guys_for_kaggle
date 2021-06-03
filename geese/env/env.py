@@ -38,7 +38,8 @@ class Env:
             [
                 self._dena_env.env.state[p]["status"] != "ACTIVE"
                 for p in range(NUM_GEESE)
-            ]
+            ],
+            dtype=np.float,
         )
 
         # Envの報酬
@@ -47,10 +48,10 @@ class Env:
         ]
 
         # 順位に基づくRawRewardの計算
-        raw_reward = np.array(self._compute_reward(env_reward))
+        raw_reward = np.array(self._compute_reward(env_reward), dtype=np.float)
 
         # 前回生きていて(1 - pre_done)今回死んだ(done)GooseにのみRewardをリターン
-        reward: list = (float(1 - pre_done) * done * raw_reward).tolist()
+        reward: list = ((1 - pre_done) * done * raw_reward).tolist()
 
         # 全Geeseが終了したらリセット
         if sum(map(int, done)) == NUM_GEESE:
