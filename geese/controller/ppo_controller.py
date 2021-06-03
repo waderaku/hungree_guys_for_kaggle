@@ -52,11 +52,12 @@ class PPOController(Controller):
         delta_q_list = create_que_list(
             self._ppo_parameter.num_parallels, NUM_GEESE)
 
-        step = 0
+        step = 1
         before_done_list = [[False]*NUM_GEESE] * \
             self._ppo_parameter.num_parallels
         before_game_done_list = [True]*self._ppo_parameter.num_parallels
         value_o_list = []
+        reward_o_list = []
         while True:
             action_list, value_n_list, prob_list =\
                 reshape_step_list(*agent.step(
@@ -69,10 +70,12 @@ class PPOController(Controller):
             for i, (reward_q, value_q) in enumerate(zip(reward_q_list, value_q_list)):
 
                 if not before_game_done_list[i]:
-                    add_delta(delta_q_list[i], reward_list[i],
+                    add_delta(delta_q_list[i], reward_o_list[i],
                               value_o_list[i], value_n_list[i], self._ppo_parameter.gamma)
 
-                if len(reward_q[0]) == self._ppo_parameter.num_step:
+                # n回経つとGAEの計算が可能
+                # →それ以降は毎回データを格納していく
+                if len(reward_q_list[i][0]) == self._ppo_parameter.num_step:
                     [r_q.popleft() for r_q in reward_q]
 
                     o = [o_q.popleft() for o_q in obs_q_list[i]]
@@ -110,6 +113,7 @@ class PPOController(Controller):
                         train_data,
                         obs_q_list[i][j],
                         action_q_list[i][j],
+                        reward_q[j],
                         delta_q_list[i][j],
                         value_q_list[i][j],
                         prob_q_list[i][j]
@@ -144,6 +148,7 @@ class PPOController(Controller):
                 reset_train_data(train_data)
             before_game_done_list = game_done_list
             value_o_list = value_n_list
+            reward_o_list = reward_list
             obs_list = next_obs_list
             step += 1
             # Save
