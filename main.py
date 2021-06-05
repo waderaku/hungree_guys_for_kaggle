@@ -18,6 +18,7 @@ from conf.parameter import (
     SAVE_FREQ,
     SAVE_DIR,
     AGAINST_GREEDY,
+    REWARD_LOG_FREQ,
 )
 import os
 
@@ -70,6 +71,7 @@ if __name__ == "__main__":
         num_sample_size=MIN_SAMPLE_SIZE,
         save_freq=SAVE_FREQ,
         save_dir=SAVE_DIR,
+        reward_log_freq=REWARD_LOG_FREQ,
         env_parameter=env_parameter,
         ppo_trainer_parameter=trainer_parameter,
         agent_parameter=agent_parameter,
