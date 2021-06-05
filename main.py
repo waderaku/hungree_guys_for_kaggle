@@ -9,6 +9,7 @@ from conf.parameter import (
     GAMMA,
     LAMBDA,
     ENTROPY_COEFFICIENT,
+    REWARD_FUNC,
     REWARD_LIST,
     NUM_LAYERS,
     NUM_FILTERS,
@@ -26,7 +27,7 @@ if not USE_GPU:
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from geese.controller.ppo_controller import PPOController
 from geese.controller.ppo_solo_controller import PPOSoloController
-from geese.constants import NO_GPU_MSG
+from geese.constants import NO_GPU_MSG, RewardFunc
 from geese.structure.parameter import (
     AgentParameter,
     EnvParameter,
@@ -61,7 +62,15 @@ if __name__ == "__main__":
         clip_eps=CLIP_EPS,
         entropy_coefficient=ENTROPY_COEFFICIENT,
     )
-    env_parameter = EnvParameter(reward_list=REWARD_LIST)
+
+    if REWARD_FUNC == "RAW":
+        reward_func = RewardFunc.RAW
+    elif REWARD_FUNC == "RANK":
+        reward_func = RewardFunc.RANK
+    else:
+        raise ValueError("Unexpected Reward Function")
+
+    env_parameter = EnvParameter(reward_func=reward_func, reward_list=REWARD_LIST)
 
     parameter = PPOParameter(
         num_parallels=NUM_PARALLELS,

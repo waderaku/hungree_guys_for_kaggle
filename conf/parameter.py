@@ -13,6 +13,7 @@ LAMBDA = 1.0
 ENTROPY_COEFFICIENT = 0.1
 
 # Env Parameter
+REWARD_FUNC = "RAW"  # or "RANK"
 REWARD_LIST = [1.0, 0.5, -0.5, -1]
 
 # Model Parameter
@@ -27,7 +28,6 @@ USE_GPU = False
 # Save Info
 SAVE_FREQ = 1000
 SAVE_DIR = "./trained_models"
-
 
 # Training Mode
 AGAINST_GREEDY = True

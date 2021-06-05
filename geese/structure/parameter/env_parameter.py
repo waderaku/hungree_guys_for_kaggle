@@ -1,9 +1,15 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
+from geese.constants import RewardFunc
 from geese.structure.parameter import Parameter
 
 
 @dataclass(frozen=True)
 class EnvParameter(Parameter):
-    reward_list: List[float]
+    reward_func: RewardFunc
+    reward_list: Optional[List[float]] = None
+
+    def __post_init__(self):
+        if self.reward_func == RewardFunc.RANK:
+            assert isinstance(self.reward_list, list)
