@@ -55,7 +55,6 @@ class PPOSoloController(Controller):
         reward_o_list = []
 
         reward_log_list = []
-        episode = 1
 
         while True:
             action_list, value_n_list, prob_list = agent.step(obs_list)
@@ -119,7 +118,6 @@ class PPOSoloController(Controller):
                 if done_list[i]:
                     # 今回のリワードをlogに追加
                     reward_log_list.append(reward_q_list[i][-1])
-                    episode += 1
 
                     # queのリセット
                     obs_q_list[i] = deque()
@@ -159,7 +157,10 @@ class PPOSoloController(Controller):
                 self._agent.save(str(save_dir))
 
             # reward log
-            if episode % self._ppo_parameter.reward_log_freq == 0:
+            if (
+                len(reward_log_list) % self._ppo_parameter.reward_log_freq == 0
+                and len(reward_log_list) != 0
+            ):
                 logger.logging_scaler(
                     "reward", sum(reward_log_list) / len(reward_log_list)
                 )
