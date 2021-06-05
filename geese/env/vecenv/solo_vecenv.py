@@ -17,6 +17,7 @@ class VecSoloEnv:
     def step(
         self, action_list: List[Action]
     ) -> Tuple[List[Observation], List[Reward], List[bool]]:
-        return tuple(
+        ret = tuple(
             zip(*[env.step(action) for env, action in zip(self._envs, action_list)])
         )
+        return tuple(map(list, ret))

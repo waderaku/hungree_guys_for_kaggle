@@ -34,7 +34,7 @@ class Env:
         self._dena_env.step(actions)
 
         # Gooseごとの終了判定
-        done = np.array(
+        done: np.ndarray = np.array(
             [
                 self._dena_env.env.state[p]["status"] != "ACTIVE"
                 for p in range(NUM_GEESE)
@@ -59,6 +59,7 @@ class Env:
 
         # Gooseごとの観測
         observation = [self._dena_env.observation(p) for p in range(NUM_GEESE)]
+        done = done.astype(np.bool).tolist()
         return observation, reward, done
 
     def __str__(self) -> str:
