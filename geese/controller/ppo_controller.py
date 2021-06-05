@@ -36,7 +36,7 @@ class PPOController(Controller):
         today = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
         logger = TensorBoardLogger(f"{LOG_BASE_DIR}/{today}")
 
-        train_data = TrainData([], [], [], [], [])
+        train_data = TrainData()
         ppo_trainer = PPOTrainer(self._ppo_parameter.ppo_trainer_parameter, logger)
         vec_env = VecEnv(
             self._ppo_parameter.num_parallels, self._ppo_parameter.env_parameter
