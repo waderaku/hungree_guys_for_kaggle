@@ -10,7 +10,7 @@ NUM_EPOCH = 30
 CLIP_EPS = 0.2
 GAMMA = 0.99
 LAMBDA = 1.0
-ENTROPY_COEFFICIENT = 0.001
+ENTROPY_COEFFICIENT = 0.1
 
 # Env Parameter
 REWARD_LIST = [1.0, 0.5, -0.5, -1]
@@ -25,5 +25,9 @@ BATCH_NORMALIZATION = True
 USE_GPU = True
 
 # Save Info
-SAVE_FREQ = 100
+SAVE_FREQ = 1000
 SAVE_DIR = "./trained_models"
+
+
+# Training Mode
+AGAINST_GREEDY = True
