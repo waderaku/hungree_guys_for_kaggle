@@ -9,9 +9,9 @@ from geese.agent.ppo_agent import PPOAgent
 from geese.constants import LOG_BASE_DIR, NUM_GEESE
 from geese.controller.controller import Controller
 from geese.controller.ppo_helper import (
-    add_delta,
-    add_to_que,
-    calc_gae,
+    add_delta_list,
+    add_to_que_list,
+    calc_gae_list,
     create_padding_data,
     create_que_list,
     reset_que,
@@ -69,7 +69,7 @@ class PPOController(Controller):
             for i, (reward_q, value_q) in enumerate(zip(reward_q_list, value_q_list)):
 
                 if not before_game_done_list[i]:
-                    add_delta(
+                    add_delta_list(
                         delta_q_list[i],
                         reward_o_list[i],
                         value_o_list[i],
@@ -87,17 +87,17 @@ class PPOController(Controller):
                     v = [v_q.popleft() for v_q in value_q]
                     p = [p_q.popleft() for p_q in prob_q_list[i]]
 
-                    gae = calc_gae(delta_q_list[i], self._ppo_parameter.gae_param)
+                    gae = calc_gae_list(delta_q_list[i], self._ppo_parameter.gae_param)
                     [d_q.popleft() for d_q in delta_q_list[i]]
 
                     update_PPO_list(train_data, o, a, gae, v, p, before_done_list[i])
 
             # n回分の行動をキューで管理
-            add_to_que(obs_q_list, obs_list)
-            add_to_que(action_q_list, action_list)
-            add_to_que(value_q_list, value_n_list)
-            add_to_que(reward_q_list, reward_list)
-            add_to_que(prob_q_list, prob_list)
+            add_to_que_list(obs_q_list, obs_list)
+            add_to_que_list(action_q_list, action_list)
+            add_to_que_list(value_q_list, value_n_list)
+            add_to_que_list(reward_q_list, reward_list)
+            add_to_que_list(prob_q_list, prob_list)
 
             for i, (reward_q, value_q) in enumerate(zip(reward_q_list, value_q_list)):
 

@@ -11,11 +11,15 @@ from geese.structure.parameter.ppo_parameter import PPOParameter
 import numpy as np
 
 
-def calc_gae(delta_q: List[Deque], gae_param: np.ndarray) -> List[float]:
-    return [np.sum(np.array(d_q) * gae_param) for d_q in delta_q]
+def calc_gae_list(delta_q: List[Deque], gae_param: np.ndarray) -> List[float]:
+    return [calc_gae(d_q, gae_param) for d_q in delta_q]
 
 
-def add_delta(
+def calc_gae(d_q: Deque, gae_param: np.ndarray):
+    return np.sum(np.array(d_q) * gae_param)
+
+
+def add_delta_list(
     delta_que: List[Deque],
     reward_list: List[float],
     v_old_list: List[float],
@@ -23,11 +27,17 @@ def add_delta(
     gamma: float,
 ) -> None:
     [
-        d_q.append(reward + v_new * gamma - v_old)
+        add_delta(d_q, reward, v_new, v_old, gamma)
         for reward, v_old, v_new, d_q in zip(
             reward_list, v_old_list, v_new_list, delta_que
         )
     ]
+
+
+def add_delta(
+    d_q: Deque, reward: float, v_new: float, v_old: float, gamma: float
+) -> None:
+    d_q.append(reward + v_new * gamma - v_old)
 
 
 def update_PPO_list(
@@ -66,13 +76,17 @@ def reset_train_data(train_data: TrainData) -> None:
     train_data.pi_list = []
 
 
-def add_to_que(
+def add_to_que_list(
     traget_que_list: List[List[Deque]], add_data_list: List[List[Any]]
 ) -> None:
     [
-        [t_q.append(a_d) for t_q, a_d in zip(target_q, add_data)]
+        add_to_que(target_q, add_data)
         for target_q, add_data in zip(traget_que_list, add_data_list)
     ]
+
+
+def add_to_que(target_q: List[Deque], add_data: List[Deque]) -> None:
+    [t_q.append(a_d) for t_q, a_d in zip(target_q, add_data)]
 
 
 def create_padding_data(
@@ -93,7 +107,7 @@ def create_padding_data(
     ):
         raise ValueError
 
-    add_delta([delta_q], [reward_q[-1]], [value_q[-1]], [0.0], ppo_parameter.gamma)
+    add_delta(delta_q, reward_q[-1], value_q[-1], 0.0, ppo_parameter.gamma)
     if len(delta_q) != ppo_parameter.num_step:
         target_delta_q = copy.deepcopy(delta_q)
         while len(target_delta_q) != ppo_parameter.num_step:
@@ -133,3 +147,26 @@ def reshape_step_list(
     ]
 
     return reshape_action_list, reshape_value_n_list, reshape_prob_list
+
+
+def update_self_PPO_list(
+    r_q: Deque,
+    o_q: Deque,
+    a_q: Deque,
+    v_q: Deque,
+    p_q: Deque,
+    d_q: Deque,
+    gae_param: np.ndarray,
+    train_data: TrainData,
+    before_done: bool,
+) -> None:
+    r_q.popleft()
+
+    o = o_q.popleft()
+    a = action2int(a_q.popleft())
+    v = v_q.popleft()
+    p = p_q.popleft()
+    gae = calc_gae(d_q, gae_param)
+    d_q.popleft()
+
+    update_PPO_list(train_data, [o], [a], [gae], [v], [p], [before_done])
