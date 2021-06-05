@@ -122,6 +122,7 @@ class PPOSoloController(Controller):
                     prob_q_list[i] = deque()
                     delta_q_list[i] = deque()
                     before_done_list[i] = False
+                    before_game_done_list[i] = True
                 else:
                     before_done_list[i] = done_list[i]
 
@@ -137,6 +138,7 @@ class PPOSoloController(Controller):
 
                 # trainに投げたデータ全削除
                 reset_train_data(train_data)
+            before_game_done_list = done_list
             value_o_list = value_n_list
             reward_o_list = reward_list
             obs_list = next_obs_list
