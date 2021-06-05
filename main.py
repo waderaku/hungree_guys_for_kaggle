@@ -17,12 +17,14 @@ from conf.parameter import (
     USE_GPU,
     SAVE_FREQ,
     SAVE_DIR,
+    AGAINST_GREEDY,
 )
 import os
 
 if not USE_GPU:
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from geese.controller.ppo_controller import PPOController
+from geese.controller.ppo_solo_controller import PPOSoloController
 from geese.constants import NO_GPU_MSG
 from geese.structure.parameter import (
     AgentParameter,
@@ -73,5 +75,8 @@ if __name__ == "__main__":
         agent_parameter=agent_parameter,
     )
 
-    controller = PPOController(parameter)
+    if AGAINST_GREEDY:
+        controller = PPOSoloController(parameter)
+    else:
+        controller = PPOController(parameter)
     controller.train()

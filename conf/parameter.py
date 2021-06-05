@@ -27,3 +27,7 @@ USE_GPU = True
 # Save Info
 SAVE_FREQ = 100
 SAVE_DIR = "./trained_models"
+
+
+# Training Mode
+AGAINST_GREEDY = True
