@@ -23,11 +23,13 @@ KERNEL_SIZE = (3, 3)
 BATCH_NORMALIZATION = True
 
 # GPU (Only CPU for now)
-USE_GPU = True
+USE_GPU = False
 
 # Save Info
 SAVE_FREQ = 1000
-SAVE_DIR = "./trained_models"
 
 # Training Mode
 AGAINST_GREEDY = True
+
+# log Info
+REWARD_LOG_FREQ = 100

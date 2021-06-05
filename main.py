@@ -17,8 +17,8 @@ from conf.parameter import (
     BATCH_NORMALIZATION,
     USE_GPU,
     SAVE_FREQ,
-    SAVE_DIR,
     AGAINST_GREEDY,
+    REWARD_LOG_FREQ,
 )
 import os
 
@@ -26,7 +26,7 @@ if not USE_GPU:
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from geese.controller.ppo_controller import PPOController
 from geese.controller.ppo_solo_controller import PPOSoloController
-from geese.constants import NO_GPU_MSG, RewardFunc
+from geese.constants import NO_GPU_MSG, RewardFunc, SAVE_DIR
 from geese.structure.parameter import (
     AgentParameter,
     EnvParameter,
@@ -79,6 +79,7 @@ if __name__ == "__main__":
         num_sample_size=MIN_SAMPLE_SIZE,
         save_freq=SAVE_FREQ,
         save_dir=SAVE_DIR,
+        reward_log_freq=REWARD_LOG_FREQ,
         env_parameter=env_parameter,
         ppo_trainer_parameter=trainer_parameter,
         agent_parameter=agent_parameter,
