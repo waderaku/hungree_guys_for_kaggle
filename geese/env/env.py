@@ -84,3 +84,7 @@ class Env:
             rank_array[i] = rank
 
         return [self._reward_list[rank] for rank in rank_array]
+
+    @property
+    def dena_env(self) -> DenaEnv:
+        return self._dena_env
