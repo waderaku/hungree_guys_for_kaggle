@@ -1,3 +1,4 @@
+import enum
 from kaggle_environments.envs.hungry_geese.hungry_geese import Action
 
 # Field Size
@@ -18,3 +19,8 @@ NO_GPU_MSG = "GPU is not available."
 
 # log directory
 LOG_BASE_DIR = "logs"
+
+
+class RewardFunc(enum.Enum):
+    RAW = enum.auto()
+    RANK = enum.auto()
