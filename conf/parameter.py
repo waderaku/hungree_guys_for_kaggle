@@ -27,7 +27,6 @@ USE_GPU = False
 
 # Save Info
 SAVE_FREQ = 1000
-SAVE_DIR = "./trained_models"
 
 # Training Mode
 AGAINST_GREEDY = True
