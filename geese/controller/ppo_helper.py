@@ -15,7 +15,7 @@ def calc_gae_list(delta_q: List[Deque], gae_param: np.ndarray) -> List[float]:
     return [calc_gae(d_q, gae_param) for d_q in delta_q]
 
 
-def calc_gae(d_q: Deque, gae_param: np.ndarray):
+def calc_gae(d_q: Deque, gae_param: np.ndarray) -> np.ndarray:
     return np.sum(np.array(d_q) * gae_param)
 
 
