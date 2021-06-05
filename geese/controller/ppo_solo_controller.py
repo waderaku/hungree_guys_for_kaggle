@@ -6,7 +6,7 @@ from geese.structure.sample.ppo_sample import PPOSample
 from pathlib import Path
 
 import numpy as np
-from geese.env.vecenv.vecsoloenv import VecSoloEnv
+from geese.env.vecenv.solo_vecenv import VecSoloEnv
 from geese.controller.ppo_helper import (
     add_delta,
     add_to_que,
