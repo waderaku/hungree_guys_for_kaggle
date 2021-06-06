@@ -33,3 +33,6 @@ AGAINST_GREEDY = True
 
 # log Info
 REWARD_LOG_FREQ = 100
+
+# reward Info
+SCALE_FLG = True
