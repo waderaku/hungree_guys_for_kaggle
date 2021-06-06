@@ -19,6 +19,7 @@ from conf.parameter import (
     SAVE_FREQ,
     AGAINST_GREEDY,
     REWARD_LOG_FREQ,
+    SCALE_FLG,
 )
 import os
 
@@ -70,7 +71,7 @@ if __name__ == "__main__":
         raise ValueError("Unexpected Reward Function")
 
     env_parameter = EnvParameter(
-        reward_func=reward_func, reward_list=REWARD_LIST, scale_flg=True
+        reward_func=reward_func, reward_list=REWARD_LIST, scale_flg=SCALE_FLG
     )
 
     parameter = PPOParameter(
