@@ -101,7 +101,9 @@ class Env:
         else:
             return np.array(env_rewards, dtype=np.float)
 
-    def _update_reward(self, reward, done, pre_done):
+    def _update_reward(
+        self, reward: List[float], done: np.ndarray, pre_done: np.ndarray
+    ) -> None:
         sum_reward = 0
         sum_squared_reward = 0
         num = 0
