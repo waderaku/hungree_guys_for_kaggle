@@ -15,6 +15,8 @@ class Env:
         self._env = self._dena_env.env
         self._reward_func = parameter.reward_func
         self._reward_list = parameter.reward_list
+        self._max_reward_value = parameter.max_reward_value
+        self._press_flg = parameter.press_flg
         self._scale_flg = parameter.scale_flg
         if self._scale_flg:
             self._num = 0
@@ -58,6 +60,9 @@ class Env:
 
         # 前回生きていて(1 - pre_done)今回死んだ(done)GooseにのみRewardをリターン
         reward: list = ((1 - pre_done) * done * raw_reward).tolist()
+
+        if self._press_flg:
+            reward = list(map(lambda x: (x / self._max_reward_value - 0.5) * 2, reward))
 
         if self._scale_flg:
             reward = self._update_reward(reward, done, pre_done)
