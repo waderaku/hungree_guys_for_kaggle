@@ -9,6 +9,7 @@ from geese.structure.parameter import Parameter
 class EnvParameter(Parameter):
     reward_func: RewardFunc
     reward_list: Optional[List[float]] = None
+    scale_flg: bool = False
 
     def __post_init__(self):
         if self.reward_func == RewardFunc.RANK:
