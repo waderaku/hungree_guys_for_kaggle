@@ -165,4 +165,3 @@ class PPOSoloController(Controller):
                     "reward", sum(reward_log_list) / len(reward_log_list)
                 )
                 reward_log_list = []
-

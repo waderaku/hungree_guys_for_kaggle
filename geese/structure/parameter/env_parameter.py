@@ -8,8 +8,10 @@ from geese.structure.parameter import Parameter
 @dataclass(frozen=True)
 class EnvParameter(Parameter):
     reward_func: RewardFunc
+    max_reward_value: float
     reward_list: Optional[List[float]] = None
     scale_flg: bool = False
+    press_flg: bool = False
 
     def __post_init__(self):
         if self.reward_func == RewardFunc.RANK:
