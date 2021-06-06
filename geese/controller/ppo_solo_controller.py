@@ -158,7 +158,7 @@ class PPOSoloController(Controller):
 
             # reward log
             if (
-                len(reward_log_list) % self._ppo_parameter.reward_log_freq == 0
+                len(reward_log_list) >= self._ppo_parameter.reward_log_freq
                 and len(reward_log_list) != 0
             ):
                 logger.logging_scaler(

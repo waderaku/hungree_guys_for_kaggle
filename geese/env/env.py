@@ -118,10 +118,9 @@ class Env:
             return reward
 
         old_per = self._num / new_num
-        new_per = num / new_num
 
-        self._ave = self._ave * old_per + sum_reward * new_per
-        self._squared_ave = self._squared_ave * old_per + sum_squared_reward * new_per
+        self._ave = self._ave * old_per + sum_reward / new_num
+        self._squared_ave = self._squared_ave * old_per + sum_squared_reward / new_num
 
         self._num = new_num
 
