@@ -1,5 +1,5 @@
 from typing import List, Tuple
-
+import math
 import numpy as np
 from geese.constants import NUM_GEESE, RewardFunc
 from geese.env.dena_env import Environment as DenaEnv
@@ -15,6 +15,13 @@ class Env:
         self._env = self._dena_env.env
         self._reward_func = parameter.reward_func
         self._reward_list = parameter.reward_list
+        self._max_reward_value = parameter.max_reward_value
+        self._press_flg = parameter.press_flg
+        self._scale_flg = parameter.scale_flg
+        if self._scale_flg:
+            self._num = 0
+            self._ave = 0
+            self._squared_ave = 0
 
     def reset(self) -> List[Observation]:
         self._dena_env.reset()
@@ -54,6 +61,12 @@ class Env:
         # 前回生きていて(1 - pre_done)今回死んだ(done)GooseにのみRewardをリターン
         reward: list = ((1 - pre_done) * done * raw_reward).tolist()
 
+        if self._press_flg:
+            reward = list(map(lambda x: (x / self._max_reward_value - 0.5) * 2, reward))
+
+        if self._scale_flg:
+            reward = self._update_reward(reward, done, pre_done)
+
         # 全Geeseが終了したらリセット
         if sum(map(int, done)) == NUM_GEESE:
             self._dena_env.reset()
@@ -92,6 +105,36 @@ class Env:
             )
         else:
             return np.array(env_rewards, dtype=np.float)
+
+    def _update_reward(
+        self, reward: List[float], done: np.ndarray, pre_done: np.ndarray
+    ) -> None:
+        sum_reward = 0
+        sum_squared_reward = 0
+        num = 0
+        for r, d, p_d in zip(reward, done, pre_done):
+            if d != p_d:
+                sum_reward += r
+                sum_squared_reward += r * r
+                num += 1
+        new_num = self._num + num
+
+        if new_num == 0:
+            return reward
+
+        old_per = self._num / new_num
+
+        self._ave = self._ave * old_per + sum_reward / new_num
+        self._squared_ave = self._squared_ave * old_per + sum_squared_reward / new_num
+
+        self._num = new_num
+
+        siguma = math.sqrt(self._squared_ave - (self._ave * self._ave))
+
+        if siguma == 0:
+            return reward
+
+        return list(map(lambda x: x / siguma, reward))
 
     @property
     def dena_env(self) -> DenaEnv:

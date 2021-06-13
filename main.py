@@ -1,4 +1,5 @@
 from conf.parameter import (
+    MAX_REWARD_VALUE,
     NUM_PARALLELS,
     NUM_STEP,
     MIN_SAMPLE_SIZE,
@@ -9,6 +10,7 @@ from conf.parameter import (
     GAMMA,
     LAMBDA,
     ENTROPY_COEFFICIENT,
+    PRESS_FLG,
     REWARD_FUNC,
     REWARD_LIST,
     NUM_LAYERS,
@@ -19,6 +21,7 @@ from conf.parameter import (
     SAVE_FREQ,
     AGAINST_GREEDY,
     REWARD_LOG_FREQ,
+    SCALE_FLG,
 )
 import os
 
@@ -69,7 +72,13 @@ if __name__ == "__main__":
     else:
         raise ValueError("Unexpected Reward Function")
 
-    env_parameter = EnvParameter(reward_func=reward_func, reward_list=REWARD_LIST)
+    env_parameter = EnvParameter(
+        reward_func=reward_func,
+        reward_list=REWARD_LIST,
+        scale_flg=SCALE_FLG,
+        press_flg=PRESS_FLG,
+        max_reward_value=MAX_REWARD_VALUE,
+    )
 
     parameter = PPOParameter(
         num_parallels=NUM_PARALLELS,

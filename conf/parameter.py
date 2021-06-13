@@ -33,3 +33,8 @@ AGAINST_GREEDY = True
 
 # log Info
 REWARD_LOG_FREQ = 100
+
+# reward Info
+SCALE_FLG = False
+PRESS_FLG = True
+MAX_REWARD_VALUE = 20099
