@@ -57,7 +57,9 @@ class PPOSoloController(Controller):
         reward_log_list = []
 
         while True:
-            action_list, value_n_list, prob_list = agent.step(obs_list)
+            action_list, value_n_list, prob_list = agent.step(
+                obs_list, True, before_game_done_list
+            )
 
             next_obs_list, reward_list, done_list = vec_solo_env.step(action_list)
 
