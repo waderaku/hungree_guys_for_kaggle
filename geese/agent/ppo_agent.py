@@ -19,6 +19,8 @@ class PPOAgent(Agent):
         # KaggleAgentとして利用するためのKaggle Observation
         self._last_obs = None
 
+        self._last_action = None
+
     # return Tuple([4], [4], [4*4])
     def step(
         self, obs: List[Observation], masked_flg=False
