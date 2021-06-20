@@ -32,14 +32,16 @@ class PPOAgent(Agent):
         prob_list = prob_list.numpy()
         value_list = value_list.numpy()
         if masked_flg and self._last_action is not None:
-            last_action_index = [action2int(action) for action in self._last_action]
-            last_action_one_hot = np.identity(len(ACTIONLIST))[last_action_index]
+            mask_action_index = [
+                self._mask_action(action2int(action)) for action in self._last_action
+            ]
+            mask_action_one_hot = np.identity(len(ACTIONLIST))[mask_action_index]
             # 前回の行動を0、それ以外を1にする
-            last_action_one_hot = (
-                last_action_one_hot.T * (1 - np.array(before_done_list))
+            mask_action_one_hot = (
+                mask_action_one_hot.T * (1 - np.array(before_done_list))
             ).T * -1 + 1
             # masking
-            masked_prob_list = prob_list * last_action_one_hot
+            masked_prob_list = prob_list * mask_action_one_hot
             sum_prob_list = np.sum(masked_prob_list, axis=1)
             next_action_list = [
                 np.random.choice(ACTIONLIST, p=prob / (sum_prob + 1e-10))
@@ -51,6 +53,18 @@ class PPOAgent(Agent):
             ]
         self._last_action = next_action_list
         return next_action_list, value_list, prob_list
+
+    def _mask_action(self, action: int):
+        if action == 0:
+            return 1
+        elif action == 1:
+            return 0
+        elif action == 2:
+            return 3
+        elif action == 3:
+            return 2
+        else:
+            raise ValueError
 
     def get_action(self, obs: Observation) -> Action:
         next_action, _, _ = self.step([obs])
