@@ -1,3 +1,4 @@
+from geese.controller.cartpole_controller import CartPoleController
 from conf.parameter import (
     NUM_PARALLELS,
     NUM_STEP,
@@ -11,30 +12,25 @@ from conf.parameter import (
     ENTROPY_COEFFICIENT,
     REWARD_FUNC,
     REWARD_LIST,
-    NUM_LAYERS,
-    NUM_FILTERS,
-    KERNEL_SIZE,
-    BATCH_NORMALIZATION,
     USE_GPU,
     SAVE_FREQ,
     SAVE_DIR,
-    AGAINST_GREEDY,
 )
 import os
 
 if not USE_GPU:
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-from geese.controller.ppo_controller import PPOController
-from geese.controller.ppo_solo_controller import PPOSoloController
-from geese.constants import ACTIONLIST, NO_GPU_MSG, RewardFunc
+from geese.constants import NO_GPU_MSG, RewardFunc
 from geese.structure.parameter import (
     AgentParameter,
     EnvParameter,
-    BaseModelParameter,
+    CPModelParameter,
     PPOTrainerParameter,
     PPOParameter,
 )
-from geese.agent.model import BaseModel
+from geese.agent.model import CPModel
+
+NUM_ACTION = 2
 
 
 if __name__ == "__main__":
@@ -43,15 +39,7 @@ if __name__ == "__main__":
 
         assert tf.test.is_gpu_available(), NO_GPU_MSG
 
-    model = BaseModel(
-        BaseModelParameter(
-            num_layers=NUM_LAYERS,
-            num_filters=NUM_FILTERS,
-            kernel_size=KERNEL_SIZE,
-            bn=BATCH_NORMALIZATION,
-            use_gpu=USE_GPU,
-        )
-    )
+    model = CPModel(CPModelParameter(128, 4))
 
     agent_parameter = AgentParameter(model=model)
     trainer_parameter = PPOTrainerParameter(
@@ -60,7 +48,7 @@ if __name__ == "__main__":
         num_epoch=NUM_EPOCH,
         clip_eps=CLIP_EPS,
         entropy_coefficient=ENTROPY_COEFFICIENT,
-        num_action=len(ACTIONLIST),
+        num_action=NUM_ACTION,
     )
 
     if REWARD_FUNC == "RAW":
@@ -85,8 +73,5 @@ if __name__ == "__main__":
         agent_parameter=agent_parameter,
     )
 
-    if AGAINST_GREEDY:
-        controller = PPOSoloController(parameter)
-    else:
-        controller = PPOController(parameter)
+    controller = CartPoleController(parameter)
     controller.train()

@@ -14,3 +14,4 @@ class PPOTrainerParameter(TrainerParameter):
     num_epoch: int
     clip_eps: float
     entropy_coefficient: float
+    num_action: int

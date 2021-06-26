@@ -5,7 +5,6 @@ import tensorflow as tf
 from geese.trainer.trainer import Trainer
 from geese.structure.sample import PPOSample
 from geese.structure.parameter import PPOTrainerParameter
-from geese.constants import ACTIONLIST
 from geese.util.converter import type32
 from geese.util.tensor_boad_logger import TensorBoardLogger
 
@@ -21,7 +20,7 @@ class PPOTrainer(Trainer):
         self._num_epoch = parameter.num_epoch
         self._clip_eps = parameter.clip_eps
         self._entropy_coefficient = parameter.entropy_coefficient
-        self._n_action = len(ACTIONLIST)
+        self._n_action = parameter.num_action
         self._logger = logger
 
     def train(self, model: tf.keras.models.Model, sample: PPOSample) -> None:

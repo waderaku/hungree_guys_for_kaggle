@@ -5,3 +5,4 @@ from geese.structure.parameter.trainer_parameter import PPOTrainerParameter
 from geese.structure.parameter.env_parameter import EnvParameter
 from geese.structure.parameter.agent_parameter import AgentParameter
 from geese.structure.parameter.ppo_parameter import PPOParameter
+from geese.structure.parameter.cpmodel_parameter import CPModelParameter
