@@ -45,10 +45,12 @@ class PPOTrainer(Trainer):
             args = [model] + list(
                 map(type32, map(tf.convert_to_tensor, map(indexing, tmp_args)))
             )
-            loss_policy, loss_value, loss_entropy = self._train(*args)
+            loss_policy, loss_value, loss_entropy, entropy, v_targ = self._train(*args)
             self._logger.logging_scaler("loss_policy", loss_policy)
             self._logger.logging_scaler("loss_value", loss_value)
             self._logger.logging_scaler("loss_entropy", loss_entropy)
+            self._logger.logging_scaler("entropy", entropy)
+            self._logger.logging_scaler("v_targ", v_targ)
 
     @tf.function
     def _train(
@@ -59,7 +61,7 @@ class PPOTrainer(Trainer):
         advantage: tf.Tensor,
         v_old: tf.Tensor,
         pi_old: tf.Tensor,
-    ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
+    ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor]:
         with tf.GradientTape() as tape:
             # B, A and B
             pi_new, v_new = model(observation)
@@ -82,20 +84,22 @@ class PPOTrainer(Trainer):
             # TFは勾配降下しかできないので、最大化したい目的関数の逆符号の最小化を行う
             loss_policy = -tf.reduce_mean(clipped_advantage)
 
-            # Value Lossの計算
-            loss_value = tf.reduce_mean(tf.keras.losses.MSE(advantage + v_old, v_new))
+            # Valueの教師信号の計算
+            v_targ = advantage + v_old
 
-            # Entropy Lossの計算
-            loss_entropy = (
-                tf.reduce_mean(
-                    tf.reduce_sum(pi_new * tf.math.log(pi_new + EPS), axis=-1)
-                )
-                * self._entropy_coefficient
+            # Value Lossの計算
+            loss_value = tf.reduce_mean(tf.keras.losses.MSE(v_targ, v_new))
+
+            # Entropyの計算
+            entropy = -tf.reduce_mean(
+                tf.reduce_sum(pi_new * tf.math.log(pi_new + EPS), axis=-1)
             )
+            # Entropy Lossの計算
+            loss_entropy = -entropy * self._entropy_coefficient
 
             loss_total = loss_policy + loss_value + loss_entropy
 
             # Apply Gradients
             gradient = tape.gradient(loss_total, model.trainable_variables)
             self._optimizer.apply_gradients(zip(gradient, model.trainable_variables))
-        return loss_policy, loss_value, loss_entropy
+        return loss_policy, loss_value, loss_entropy, entropy, tf.reduce_mean(v_targ)
