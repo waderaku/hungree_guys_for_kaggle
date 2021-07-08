@@ -10,7 +10,7 @@ NUM_EPOCH = 30
 CLIP_EPS = 0.2
 GAMMA = 0.99
 LAMBDA = 1.0
-ENTROPY_COEFFICIENT = 0.1
+ENTROPY_COEFFICIENT = 0.3
 
 # Env Parameter
 REWARD_FUNC = "RAW"  # or "RANK"
@@ -23,7 +23,7 @@ KERNEL_SIZE = (3, 3)
 BATCH_NORMALIZATION = True
 
 # GPU (Only CPU for now)
-USE_GPU = False
+USE_GPU = True
 
 # Save Info
 SAVE_FREQ = 1000

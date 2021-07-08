@@ -55,17 +55,19 @@ class Env:
             self._dena_env.env.state[p]["reward"] for p in range(len(actions))
         ]
 
-        # 順位に基づくRawRewardの計算
+        # 報酬関数の適用
         raw_reward = self._compute_reward(env_reward)
+
+        if self._press_flg:
+            raw_reward = list(
+                map(lambda x: (x / self._max_reward_value - 0.5) * 2, raw_reward)
+            )
+
+        if self._scale_flg:
+            raw_reward = self._update_reward(raw_reward, done, pre_done)
 
         # 前回生きていて(1 - pre_done)今回死んだ(done)GooseにのみRewardをリターン
         reward: list = ((1 - pre_done) * done * raw_reward).tolist()
-
-        if self._press_flg:
-            reward = list(map(lambda x: (x / self._max_reward_value - 0.5) * 2, reward))
-
-        if self._scale_flg:
-            reward = self._update_reward(reward, done, pre_done)
 
         # 全Geeseが終了したらリセット
         if sum(map(int, done)) == NUM_GEESE:

@@ -12,6 +12,8 @@ from kaggle_environments.envs.hungry_geese.hungry_geese import (
     Observation as KaggleObservation,
 )
 
+EPS = 1e-6
+
 
 class PPOAgent(Agent):
     def __init__(self, parameter: AgentParameter):
@@ -41,10 +43,10 @@ class PPOAgent(Agent):
                 mask_action_one_hot.T * (1 - np.array(before_done_list))
             ).T * -1 + 1
             # masking
-            masked_prob_list = prob_list * mask_action_one_hot
+            masked_prob_list = (prob_list + EPS) * mask_action_one_hot
             sum_prob_list = np.sum(masked_prob_list, axis=1)
             next_action_list = [
-                np.random.choice(ACTIONLIST, p=prob / (sum_prob + 1e-10))
+                np.random.choice(ACTIONLIST, p=prob / sum_prob)
                 for prob, sum_prob in zip(masked_prob_list, sum_prob_list)
             ]
         else:
