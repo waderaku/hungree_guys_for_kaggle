@@ -11,7 +11,7 @@ from geese.structure.parameter.ppo_parameter import PPOParameter
 import numpy as np
 
 
-def calc_gae_list(delta_q: List[Deque], gae_param: np.ndarray) -> List[float]:
+def calc_gae_list(delta_q: List[Deque[float]], gae_param: np.ndarray) -> List[float]:
     """delta_qにある各DequeからそれぞれのGAEを算出する
 
     Args:
@@ -24,7 +24,7 @@ def calc_gae_list(delta_q: List[Deque], gae_param: np.ndarray) -> List[float]:
     return [calc_gae(d_q, gae_param) for d_q in delta_q]
 
 
-def calc_gae(d_q: Deque, gae_param: np.ndarray) -> float:
+def calc_gae(d_q: Deque[float], gae_param: np.ndarray) -> float:
     """キューに保存されている値からGAEを算出する
 
     Args:
@@ -34,11 +34,12 @@ def calc_gae(d_q: Deque, gae_param: np.ndarray) -> float:
     Returns:
         float: 算出したGAE
     """
+    assert len(d_q) == len(gae_param)
     return np.sum(np.array(d_q) * gae_param)
 
 
 def add_delta_list(
-    delta_que: List[Deque],
+    delta_que: List[Deque[float]],
     reward_list: List[float],
     v_old_list: List[float],
     v_new_list: List[float],
@@ -62,7 +63,7 @@ def add_delta_list(
 
 
 def add_delta(
-    d_q: Deque, reward: float, v_new: float, v_old: float, gamma: float
+    d_q: Deque[float], reward: float, v_old: float, v_new: float, gamma: float
 ) -> None:
     """今回δを算出し、キューの右側に追加する
 
@@ -108,7 +109,7 @@ def update_PPO_list(
     train_data.pi_list.extend([p for p, d in zip(prob, player_done_list) if not d])
 
 
-def create_que_list(index_1: int, index_2: int) -> List[List[Deque]]:
+def create_que_list(index_1: int, index_2: int) -> List[List[Deque[Any]]]:
     """空のDequeが格納されている二次元リストを作成する
 
     Args:
@@ -121,7 +122,7 @@ def create_que_list(index_1: int, index_2: int) -> List[List[Deque]]:
     return [[deque() for _ in range(index_2)] for __ in range(index_1)]
 
 
-def reset_que(index: int) -> List[Deque]:
+def reset_que(index: int) -> List[Deque[Any]]:
     """空のDequeが格納されているリストを作成する
 
     Args:
@@ -162,7 +163,7 @@ def add_to_que_list(
     ]
 
 
-def add_to_que(target_q: List[Deque], add_data: List[Any]) -> None:
+def add_to_que(target_q: List[Deque[Any]], add_data: List[Any]) -> None:
     """target_q内の各Dequeに対応するadd_dataの各要素を追加する
 
     Args:
@@ -175,12 +176,12 @@ def add_to_que(target_q: List[Deque], add_data: List[Any]) -> None:
 def create_padding_data(
     ppo_parameter: PPOParameter,
     train_data: TrainData,
-    obs_q: Deque,
-    action_q: Deque,
-    reward_q: Deque,
-    delta_q: Deque,
-    value_q: Deque,
-    prob_q: Deque,
+    obs_q: Deque[np.ndarray],
+    action_q: Deque[Action],
+    reward_q: Deque[float],
+    delta_q: Deque[float],
+    value_q: Deque[float],
+    prob_q: Deque[np.ndarray],
 ) -> None:
     """終了したゲームのデータに対して、n回分パディングしてトレーニングデータを作成する
 
@@ -202,8 +203,9 @@ def create_padding_data(
         len(obs_q) != len(action_q)
         or len(obs_q) != len(value_q)
         or len(obs_q) != len(prob_q)
+        or len(obs_q) != len(delta_q) + 1
     ):
-        raise ValueError
+        raise ValueError("引数のQueueの長さがマッチしません。")
 
     add_delta(delta_q, reward_q[-1], value_q[-1], 0.0, ppo_parameter.gamma)
     if len(delta_q) != ppo_parameter.num_step:
@@ -216,7 +218,7 @@ def create_padding_data(
     for _ in range(len(obs_q)):
         obs = obs_q.popleft()
         action = action2int(action_q.popleft())
-        gae = calc_gae(target_delta_q, ppo_parameter.gamma)
+        gae = calc_gae(target_delta_q, ppo_parameter.gae_param)
         value = value_q.popleft()
         prob = prob_q.popleft()
         update_PPO_list(train_data, [obs], [action], [gae], [value], [prob], [False])
@@ -259,12 +261,12 @@ def reshape_step_list(
 
 
 def update_self_PPO_list(
-    r_q: Deque,
-    o_q: Deque,
-    a_q: Deque,
-    v_q: Deque,
-    p_q: Deque,
-    d_q: Deque,
+    r_q: Deque[float],
+    o_q: Deque[np.ndarray],
+    a_q: Deque[int],
+    v_q: Deque[float],
+    p_q: Deque[np.ndarray],
+    d_q: Deque[float],
     gae_param: np.ndarray,
     train_data: TrainData,
     before_done: bool,
