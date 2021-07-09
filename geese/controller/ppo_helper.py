@@ -219,6 +219,8 @@ def create_padding_data(
         obs = obs_q.popleft()
         action = action2int(action_q.popleft())
         gae = calc_gae(target_delta_q, ppo_parameter.gae_param)
+        target_delta_q.popleft()
+        target_delta_q.append(0)
         value = value_q.popleft()
         prob = prob_q.popleft()
         update_PPO_list(train_data, [obs], [action], [gae], [value], [prob], [False])
