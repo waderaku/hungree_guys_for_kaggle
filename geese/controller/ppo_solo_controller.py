@@ -28,10 +28,14 @@ class PPOSoloController(Controller):
         self._agent = PPOAgent(ppo_parameter.agent_parameter)
 
     def train(self) -> None:
+        # ロギングファイル生成
         today = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
         logger = TensorBoardLogger(f"{LOG_BASE_DIR}/{today}")
 
+        # 並列ユーザー数
         num_parallels = self._ppo_parameter.num_parallels
+
+        # 一連のオブジェクトのインスタンス化
         train_data = TrainData()
         ppo_trainer = PPOTrainer(self._ppo_parameter.ppo_trainer_parameter, logger)
         vec_solo_env = VecSoloEnv(
@@ -39,31 +43,35 @@ class PPOSoloController(Controller):
         )
         agent = self._agent
 
+        # すべてのゲームを初期化する
         obs_list = vec_solo_env.reset()
 
+        # 学習用データの初期化
         obs_q_list = reset_que(self._ppo_parameter.num_parallels)
         reward_q_list = reset_que(self._ppo_parameter.num_parallels)
         action_q_list = reset_que(self._ppo_parameter.num_parallels)
         value_q_list = reset_que(self._ppo_parameter.num_parallels)
         prob_q_list = reset_que(self._ppo_parameter.num_parallels)
         delta_q_list = reset_que(self._ppo_parameter.num_parallels)
-
         step = 1
-        before_done_list = [False] * self._ppo_parameter.num_parallels
         before_game_done_list = [True] * self._ppo_parameter.num_parallels
-        value_o_list = []
-        reward_o_list = []
+        value_o_list = list()
+        reward_o_list = list()
 
-        reward_log_list = []
-        episodelen_log_list = []
+        # ロギングデータ初期化
+        reward_log_list = list()
+        episodelen_log_list = list()
 
         while True:
+            # 今回の行動をエージェントが決定する
             action_list, value_n_list, prob_list = agent.step(
                 obs_list, True, before_game_done_list
             )
 
+            # 上で決定した行動をとる
             next_obs_list, reward_list, done_list = vec_solo_env.step(action_list)
 
+            # 前回ゲームが終了していない場合（＝まだゲームが続いている場合）、δの計算を行う
             [
                 add_delta(
                     delta_q_list[i],
@@ -76,6 +84,8 @@ class PPOSoloController(Controller):
                 if not before_game_done_list[i]
             ]
 
+            # num_step回行動をとった場合、
+            # GAEが計算できるため、そこから学習データを追加していく
             [
                 update_self_PPO_list(
                     reward_q_list[i],
@@ -86,13 +96,13 @@ class PPOSoloController(Controller):
                     delta_q_list[i],
                     self._ppo_parameter.gae_param,
                     train_data,
-                    before_done_list[i],
                 )
                 for i in range(num_parallels)
                 if len(reward_q_list[i]) == self._ppo_parameter.num_step
             ]
 
             # n回分の行動をキューで管理
+            # 今回の情報をキューに追加
             add_to_que(obs_q_list, obs_list)
             add_to_que(action_q_list, action_list)
             add_to_que(value_q_list, value_n_list)
@@ -111,13 +121,12 @@ class PPOSoloController(Controller):
                     value_q_list[i],
                     prob_q_list[i],
                 )
-                for i, (done, before_done) in enumerate(
-                    zip(done_list, before_done_list)
-                )
-                if done != before_done
+                for i, done in enumerate(done_list)
+                if done
             ]
 
             for i in range(num_parallels):
+                # ゲームが終了している場合、リセット処理を行う
                 if done_list[i]:
                     # 今回のリワードをlogに追加
                     reward_log_list.append(reward_q_list[i][-1])
@@ -130,11 +139,8 @@ class PPOSoloController(Controller):
                     value_q_list[i] = deque()
                     prob_q_list[i] = deque()
                     delta_q_list[i] = deque()
-                    before_done_list[i] = False
-                    before_game_done_list[i] = True
-                else:
-                    before_done_list[i] = done_list[i]
 
+            # 一定数以上トレーニングデータがたまったら学習を行う
             if len(train_data.obs_list) > self._ppo_parameter.num_sample_size:
                 ppo_sample = PPOSample(
                     np.array(train_data.obs_list),
@@ -147,11 +153,14 @@ class PPOSoloController(Controller):
 
                 # trainに投げたデータ全削除
                 reset_train_data(train_data)
+
+            # 次ステップへ進む
             before_game_done_list = done_list
             value_o_list = value_n_list
             reward_o_list = reward_list
             obs_list = next_obs_list
             step += 1
+
             # Save
             if (
                 step % self._ppo_parameter.save_freq == 0
@@ -161,10 +170,7 @@ class PPOSoloController(Controller):
                 self._agent.save(str(save_dir))
 
             # reward log
-            if (
-                len(reward_log_list) >= self._ppo_parameter.reward_log_freq
-                and len(reward_log_list) != 0
-            ):
+            if len(reward_log_list) >= self._ppo_parameter.reward_log_freq:
                 logger.logging_scaler(
                     "reward", sum(reward_log_list) / len(reward_log_list)
                 )

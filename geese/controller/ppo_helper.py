@@ -267,7 +267,6 @@ def update_self_PPO_list(
     d_q: Deque,
     gae_param: np.ndarray,
     train_data: TrainData,
-    before_done: bool,
 ) -> None:
     """
 
@@ -291,4 +290,4 @@ def update_self_PPO_list(
     gae = calc_gae(d_q, gae_param)
     d_q.popleft()
 
-    update_PPO_list(train_data, [o], [a], [gae], [v], [p], [before_done])
+    update_PPO_list(train_data, [o], [a], [gae], [v], [p], [False])
