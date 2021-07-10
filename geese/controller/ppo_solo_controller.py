@@ -71,7 +71,7 @@ class PPOSoloController(Controller):
             # 上で決定した行動をとる
             next_obs_list, reward_list, done_list = vec_solo_env.step(action_list)
 
-            # 前回ゲームが終了していない場合（＝まだゲームが続いている場合）、δの計算を行う
+            # 前回ゲームが終了していない場合（step>=2）、δの計算を行う
             [
                 add_delta(
                     delta_q_list[i],

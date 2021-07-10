@@ -8,7 +8,9 @@ from geese.controller.ppo_helper import (
     calc_gae,
     calc_gae_list,
     create_padding_data,
+    update_self_PPO_list,
 )
+from geese.structure.parameter import ppo_parameter
 from geese.structure.parameter.ppo_parameter import PPOParameter
 from geese.structure.train_data import TrainData
 from geese.constants import ACTIONLIST
@@ -182,3 +184,61 @@ def test_create_padding_data_full():
     assert set(value_q) == set(train_data.v_list)
     assert set(map(to_string, prob_q)) == set(map(to_string, train_data.pi_list))
     assert set([1 - 0.25 ** 1, -1]) == set(train_data.gae_list)
+
+
+def test_update_self_PPO_list():
+
+    num_step = 4
+    ppo_param = PPOParameter(
+        num_parallels=None,
+        num_step=num_step,
+        gamma=0.5,
+        param_lambda=0.5,
+        num_sample_size=None,
+        save_freq=None,
+        save_dir=None,
+        ppo_trainer_parameter=None,
+        env_parameter=None,
+        agent_parameter=None,
+        reward_log_freq=None,
+    )
+    train_data = TrainData()
+    obs_shape = (17, 40, 21)
+
+    r_q = deque([i for i in range(num_step)])
+    o_q = deque([np.ones(shape=obs_shape) * (i + 1) for i in range(num_step)])
+    a_q = deque([ACTIONLIST[i] for i in range(num_step)])
+    d_q = deque([1.0 * (i + 1) for i in range(num_step)])
+    v_q = deque([1.0 * (i + 1) for i in range(num_step)])
+    prob_shape = (len(ACTIONLIST),)
+    p_q = deque([np.ones(shape=prob_shape) for _ in range(num_step)])
+
+    check_rq = deque([i + 1 for i in range(num_step - 1)])
+    check_oq = deque([np.ones(shape=obs_shape) * (i + 2) for i in range(num_step - 1)])
+    check_aq = deque([ACTIONLIST[i + 1] for i in range(num_step - 1)])
+    check_dq = deque([1.0 * (i + 2) for i in range(num_step - 1)])
+    check_vq = deque([1.0 * (i + 2) for i in range(num_step - 1)])
+    check_pq = deque([np.ones(shape=prob_shape) for _ in range(num_step - 1)])
+
+    check_oq2 = deque([np.ones(shape=obs_shape)])
+    check_aq2 = deque([ACTIONLIST[0]])
+    check_vq2 = deque([1.0])
+    check_pq2 = deque([np.ones(shape=prob_shape)])
+
+    update_self_PPO_list(r_q, o_q, a_q, v_q, p_q, d_q, ppo_param.gae_param, train_data)
+
+    assert set(map(to_string, check_oq)) == set(map(to_string, o_q))
+    assert set(map(action2int, check_aq)) == set(map(action2int, a_q))
+    assert set(check_dq) == set(check_dq)
+    assert set(check_vq) == set(v_q)
+    assert set(map(to_string, check_pq)) == set(map(to_string, p_q))
+    assert set(check_rq) == set(r_q)
+
+    assert set(map(to_string, check_oq2)) == set(map(to_string, train_data.obs_list))
+    assert set(map(action2int, check_aq2)) == set(train_data.action_list)
+    assert set(check_vq2) == set(train_data.v_list)
+    assert set(map(to_string, check_pq2)) == set(map(to_string, train_data.pi_list))
+    assert set([1 + 2 * 0.25 ** 1 + 3 * 0.25 ** 2 + 4 * 0.25 ** 3]) == set(
+        train_data.gae_list
+    )
+

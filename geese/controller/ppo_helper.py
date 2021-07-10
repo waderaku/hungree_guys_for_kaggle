@@ -280,10 +280,9 @@ def update_self_PPO_list(
         a_q (Deque): 時系列順に選択した行動が格納されているキュー
         v_q (Deque): 時系列順に算出されたバリューが格納されているキュー
         p_q (Deque): 時系列順に算出された確率ベクトルが格納されているキュー
-        d_q (Deque): 時系列順にゲームの終了状態が格納されているキュー
+        d_q (Deque): 時系列順にδが格納されているキュー
         gae_param (np.ndarray): GAE算出に使用するパラメータ
         train_data (TrainData): トレーニングデータが格納されているオブジェクト
-        before_done (bool): 一つ前の時間軸での終了状態
     """
     r_q.popleft()
 
