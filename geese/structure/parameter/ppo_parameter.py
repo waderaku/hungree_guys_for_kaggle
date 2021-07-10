@@ -27,7 +27,8 @@ class PPOParameter(Parameter):
     def __post_init__(self, param_lambda):
         self.gae_param = self._create_gae_param(self.gamma, param_lambda, self.num_step)
 
+    @staticmethod
     def _create_gae_param(
-        self, gamma: float, param_lambda: float, num_step: int
+        gamma: float, param_lambda: float, num_step: int
     ) -> np.ndarray:
         return np.geomspace(1, (gamma * param_lambda) ** (num_step - 1), num_step)
